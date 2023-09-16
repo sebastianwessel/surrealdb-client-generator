@@ -90,3 +90,4 @@ web_modules/
 client_generated/
 .tshy
 .tshy-build-tmp
+dist

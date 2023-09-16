@@ -41,7 +41,7 @@
     "dev": "ts-node src/index.ts",
     "lint": "eslint . --ext .ts,.js,.json --fix",
     "test": "vitest",
-    "build": "tshy"
+    "prepare": "tshy"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.7.0",
