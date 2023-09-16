@@ -1,0 +1,1 @@
+{"version":3,"file":"generateClient.js","sourceRoot":"","sources":["../../../src/genClient/generateClient.ts"],"names":[],"mappings":";;;AAAO,MAAM,cAAc,GAAG,KAAK,EAAE,aAAqB,EAAE,EAAE,GAAE,CAAC,CAAA;AAApD,QAAA,cAAc,kBAAsC","sourcesContent":["export const generateClient = async (_outputFolder: string) => {}\n"]}

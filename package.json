@@ -1,0 +1,90 @@
+{
+  "name": "@sebastianwessel/surql-gen",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "description": "A small tool which generates a typescript client for SurrealDB based on the schema of a given database",
+  "keywords": [
+    "typescript",
+    "surrealdb",
+    "client",
+    "javascript",
+    "zod",
+    "orm",
+    "database",
+    "generator",
+    "tool"
+  ],
+  "author": {
+    "name": "Sebastian Wessel",
+    "url": "https://github.com/sebastianwessel"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebastianwessel/surrealdb-client-generator.git"
+  },
+  "homepage": "https://github.com/sebastianwessel/surrealdb-client-generator",
+  "bugs": {
+    "url": "https://github.com/sebastianwessel/surrealdb-client-generator/issues",
+    "email": "project@hostname.com"
+  },
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "surql-gen": "./dist/commonjs/index.js"
+  },
+  "scripts": {
+    "start": "node dist/esm/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint . --ext .ts,.js,.json --fix",
+    "test": "vitest",
+    "build": "tshy"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "ts-node": "^10.9.1",
+    "tshy": "^1.0.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.4",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "5.0.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "prettier": "^3.0.0"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "mkdirp": "^3.0.1",
+    "rimraf": "^5.0.1",
+    "surrealdb.js": "^0.9.0",
+    "zod": "^3.22.2"
+  },
+  "tshy": {
+    "exports": {
+      "./package.json": "./package.json",
+      ".": "./src/index.ts"
+    }
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.js"
+      }
+    }
+  },
+  "type": "module"
+}

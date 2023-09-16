@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","sourceRoot":"","sources":["../../../src/config/types.ts"],"names":[],"mappings":"","sourcesContent":["import { z } from 'zod'\n\nimport { configFileSchema } from './configFileSchema.js'\n\nexport type Config = z.output<typeof configFileSchema>\n"]}
