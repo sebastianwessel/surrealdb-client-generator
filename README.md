@@ -1,7 +1,5 @@
  # SurrealDB Client & Zod Schema Generator
 
- # SurrealDB Schema Generator
-
  SurrealDB Schema Generator is a handy tool that simplifies the process of generating [zod](http://zod.dev) schemas and TypeScript clients for [SurrealDB](http://surrealdb.com) based on your provided database schema.
  Its primary purpose is to offer a fundamental starting point, not to replace a full-blown automated ORM.
 
@@ -86,7 +84,8 @@ In this subfolder, you'll find schema information and other generated code that 
 
 ### Other Generated Subfolders
 
-Apart from the `_generated` folder, additional subfolders are created during the initial execution of the tool. These subfolders are not overwritten or modified in subsequent runs.
+Apart from the `_generated` folder, additional subfolders are created during the initial execution of the tool.
+These subfolders are not overwritten or modified in subsequent runs.
 They serve as safe spaces for your customizations, changes, and enhancements:
 
 **Customization Freedom**: You can confidently make modifications and enhancements in these subfolders without worrying about them being altered by future executions of the tool.
