@@ -29,7 +29,7 @@
 You can directly execute the generation:
 
 ```bash
-npx @sebastianwessel/surql-gen
+npx surql-gen
 ```
 
 Or you can install the generator as depenedency into your project.
