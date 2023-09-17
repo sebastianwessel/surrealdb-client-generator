@@ -6,6 +6,7 @@ import { program } from 'commander'
 
 import { configFileSchema } from './config/configFileSchema.js'
 import { closeDb, connectDb, insertDefinitions } from './database/db.js'
+import { getAllTableNames } from './database/getAllTableNames.js'
 import { generateClient } from './genClient/generateClient.js'
 import { generateTableSchema } from './genSchema/generateTableSchema.js'
 import { printSorry } from './helper/printSorry.js'
@@ -90,10 +91,12 @@ const main = async () => {
   }
 
   try {
-    await generateTableSchema(resolve(__dirname, config.outputFolder))
+    const tableNames = await getAllTableNames()
+
+    await generateTableSchema(resolve(__dirname, config.outputFolder), tableNames)
 
     if (config.generateClient) {
-      await generateClient(resolve(__dirname, config.outputFolder))
+      await generateClient(resolve(__dirname, config.outputFolder), tableNames)
     }
   } catch (error) {
     printSorry(error)
