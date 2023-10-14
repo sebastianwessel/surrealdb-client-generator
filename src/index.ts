@@ -7,7 +7,8 @@ import { program } from 'commander'
 import { configFileSchema } from './config/configFileSchema.js'
 import { closeDb, connectDb, insertDefinitions } from './database/db.js'
 import { getAllTableNames } from './database/getAllTableNames.js'
-import { generateClient } from './genClient/generateClient.js'
+import { generateClientJs } from './genClient/generateClientJs.js'
+import { generateClientNode } from './genClientNode/generateClientNode.js'
 import { generateTableSchema } from './genSchema/generateTableSchema.js'
 import { printSorry } from './helper/printSorry.js'
 
@@ -18,26 +19,27 @@ const main = async () => {
     .version('1.0.0')
 
   program
-    .option('-f, --file [schemaFile]', 'a SurrealQL file containing the definitions', 'myschema.surql')
-    .option('-c, --config [configFile]', 'SurrealDB connection url', 'surql-gen.json')
-    .option('-s, --surreal [surreal]', 'SurrealDB connection url', 'ws://127.0.0.1:8000')
+    .option('-f, --schemaFile [schemaFile]', 'a SurrealQL file containing the definitions', 'myschema.surql')
+    .option('-c, --config [config]', 'config file', 'surql-gen.json')
+    .option('-s, --surreal [surreal]', 'SurrealDB connection url', 'memory')
     .option('-u, --username [username]', 'auth username', 'root')
     .option('-p, --password [password]', 'auth password', 'root')
-    .option('-n, --ns [ns]', 'the namspace', 'test')
+    .option('-n, --ns [ns]', 'the namespace', 'test')
     .option('-d, --db [db]', 'the database', 'test')
     .option('-o, --outputFolder [outputFolder]', 'output folder', 'client_generated')
     .option('-g, --generateClient [generateClient]', 'generate client', true)
+    .option('-l, --lib [lib]', 'library to be used in client', 'surrealdb.js')
 
   program.parse()
 
   const options = program.opts()
   const __dirname = process.cwd()
 
-  if (!options.configFile) {
-    console.log('No config file provided - looking for surql-gen.json in current folder')
+  if (!options.config) {
+    console.log('No config file specified - looking for surql-gen.json in current folder')
   }
 
-  const configFilePath = resolve(__dirname, options.configFile || 'surql-gen.json')
+  const configFilePath = resolve(__dirname, options.config || 'surql-gen.json')
 
   let fileContent: Record<string, unknown> = {}
   try {
@@ -45,6 +47,10 @@ const main = async () => {
     fileContent = JSON.parse(content.toString())
   } catch (error) {
     const err = error as any
+    if (options.config !== 'surql-gen.json' && err.code === 'ENOENT') {
+      console.error('Unable to find config file', configFilePath)
+      process.exit(1)
+    }
     if (err.code === 'ENOENT') {
       console.log('No config file found.')
     } else {
@@ -59,7 +65,6 @@ const main = async () => {
   const config = configFileSchema.parse({ ...fileContent, ...options })
 
   await connectDb(config)
-
   if (config.schemaFile) {
     const schemaFilePath = resolve(__dirname, config.schemaFile)
     let surQLContent: Buffer
@@ -96,7 +101,13 @@ const main = async () => {
     await generateTableSchema(resolve(__dirname, config.outputFolder), tableNames)
 
     if (config.generateClient) {
-      await generateClient(resolve(__dirname, config.outputFolder), tableNames)
+      if (config.lib === 'surrealdb.js') {
+        await generateClientJs(resolve(__dirname, config.outputFolder), tableNames, config.lib)
+      }
+
+      if (config.lib === 'surrealdb.node') {
+        await generateClientNode(resolve(__dirname, config.outputFolder), tableNames, config.lib)
+      }
     }
   } catch (error) {
     printSorry(error)
