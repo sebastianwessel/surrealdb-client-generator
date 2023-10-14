@@ -94,7 +94,7 @@ Example:
   "db": "my_database",
   "outputFolder": "./out",
   "generateClient": true,
-  "clientLib": "surrealdb.js"
+  "lib": "surrealdb.js"
 }
 ```
 
