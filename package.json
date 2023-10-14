@@ -45,28 +45,28 @@
     "prepare": "tshy"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "@typescript-eslint/parser": "^6.7.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.5",
+    "@typescript-eslint/parser": "^6.7.5",
     "ts-node": "^10.9.1",
-    "tshy": "^1.0.0",
+    "tshy": "^1.4.0",
     "typescript": "^5.2.2",
-    "vitest": "^0.34.4",
-    "eslint": "^8.44.0",
+    "vitest": "^0.34.6",
+    "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-json": "^3.1.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "5.0.0",
+    "eslint-plugin-prettier": "5.0.1",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "prettier": "^3.0.0"
   },
   "dependencies": {
-    "commander": "^11.0.0",
+    "commander": "^11.1.0",
     "mkdirp": "^3.0.1",
-    "rimraf": "^5.0.1",
+    "rimraf": "^5.0.5",
     "surrealdb.node": "^0.2.0",
-    "zod": "^3.22.2"
+    "zod": "^3.22.4"
   },
   "tshy": {
     "exports": {
@@ -87,5 +87,7 @@
       }
     }
   },
-  "type": "module"
+  "type": "module",
+  "main": "./dist/commonjs/index.js",
+  "types": "./dist/commonjs/index.d.ts"
 }
