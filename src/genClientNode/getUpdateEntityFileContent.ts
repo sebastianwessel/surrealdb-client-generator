@@ -15,13 +15,9 @@ export const update${entityNameFirstUpper} = async function (db: Surreal, id: Pr
   const key = ${entitySchemaName}.pick({ id: true }).parse({ id });
   const payload = ${entitySchemaName}.omit({ id: true }).partial().parse(${entityName});
 
-  const result = await db.query<[${entityNameFirstUpper}]>("UPDATE ONLY " + key.id + " MERGE $payload ", { payload });
+  const result = await db.query("UPDATE ONLY " + key.id + " MERGE $payload ", { payload });
 
-  if(result[0].status==="ERR") {
-    throw new Error('[DB_ERR] '+result[0].result)
-  }
-
-  return result[0].result;
+  return result[0] as ${entityNameFirstUpper};
 };
 `
 }

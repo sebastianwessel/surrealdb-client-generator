@@ -14,13 +14,9 @@ import type { PropType } from '../../PropType.ts'
 
 export const get${entityNameFirstUpper}ById = async function (db: Surreal, id: PropType<${entityNameFirstUpper}, "id">) {
   const key = ${entitySchemaName}.pick({ id: true }).parse({ id });
-  const result = await db.query<[${entityTypeName}]>("SELECT * FROM ONLY " + key.id, {});
+  const result = await db.query("SELECT * FROM ONLY " + key.id, {});
 
-  if(result[0].status==="ERR") {
-    throw new Error('[DB_ERR] '+result[0].result)
-  }
-
-  return result[0].result;
+  return result[0] ? result[0] as ${entityTypeName} : undefined;
 };
 `
 }

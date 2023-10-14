@@ -12,7 +12,7 @@ import { getDeleteEntityFileContent } from './getDeleteEntityFileContent.js'
 import { getRepositoryContent } from './getRepositoryFileContent.js'
 import { getUpdateEntityFileContent } from './getUpdateEntityFileContent.js'
 
-export const generateClient = async (outputFolder: string, tableNames: string[]) => {
+export const generateClientNode = async (outputFolder: string, tableNames: string[], lib: string) => {
   const clientFolder = resolve(outputFolder, 'client')
 
   for (const name of tableNames) {
@@ -27,14 +27,14 @@ export const generateClient = async (outputFolder: string, tableNames: string[])
     const repoFileName = resolve(clientTableFolder, `get${tableNameFirstUpper}Repository.ts`)
     if (!existsSync(repoFileName)) {
       const file = createWriteStream(repoFileName)
-      file.write(getRepositoryContent(tableNameFirstUpper))
+      file.write(getRepositoryContent(lib, tableNameFirstUpper))
       file.close()
     }
 
     const createFileName = resolve(clientTableFolder, `create${tableNameFirstUpper}.ts`)
     if (!existsSync(repoFileName)) {
       const file = createWriteStream(createFileName)
-      file.write(getCreateEntityFileContent(tableName, name))
+      file.write(getCreateEntityFileContent(lib, tableName, name))
       file.close()
       console.log(` ✅ [${tableName}]: create${tableNameFirstUpper}.ts`)
     } else {
@@ -44,7 +44,7 @@ export const generateClient = async (outputFolder: string, tableNames: string[])
     const updateFileName = resolve(clientTableFolder, `update${tableNameFirstUpper}.ts`)
     if (!existsSync(repoFileName)) {
       const file = createWriteStream(updateFileName)
-      file.write(getUpdateEntityFileContent(tableName))
+      file.write(getUpdateEntityFileContent(lib, tableName))
       file.close()
       console.log(` ✅ [${tableName}]: update${tableNameFirstUpper}.ts`)
     } else {
@@ -54,7 +54,7 @@ export const generateClient = async (outputFolder: string, tableNames: string[])
     const deleteFileName = resolve(clientTableFolder, `delete${tableNameFirstUpper}.ts`)
     if (!existsSync(repoFileName)) {
       const file = createWriteStream(deleteFileName)
-      file.write(getDeleteEntityFileContent(tableName))
+      file.write(getDeleteEntityFileContent(lib, tableName))
       file.close()
       console.log(` ✅ [${tableName}]: delete${tableNameFirstUpper}.ts`)
     } else {
@@ -64,7 +64,7 @@ export const generateClient = async (outputFolder: string, tableNames: string[])
     const getAllFileName = resolve(clientTableFolder, `getAll${tableNameFirstUpper}s.ts`)
     if (!existsSync(repoFileName)) {
       const file = createWriteStream(getAllFileName)
-      file.write(getAllEntityFileContent(tableName, name))
+      file.write(getAllEntityFileContent(lib, tableName, name))
       file.close()
       console.log(` ✅ [${tableName}]: getAll${tableNameFirstUpper}s.ts`)
     } else {
@@ -74,7 +74,7 @@ export const generateClient = async (outputFolder: string, tableNames: string[])
     const getByIdFileName = resolve(clientTableFolder, `get${tableNameFirstUpper}ById.ts`)
     if (!existsSync(repoFileName)) {
       const file = createWriteStream(getByIdFileName)
-      file.write(getByIdEntityFileContent(tableName))
+      file.write(getByIdEntityFileContent(lib, tableName))
       file.close()
       console.log(` ✅ [${tableName}]: get${tableNameFirstUpper}ById.ts`)
     } else {

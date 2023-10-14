@@ -15,13 +15,9 @@ import type { ${entityTypeName}, ${entityCreateTypeName} } from "../../schema/${
 export const create${entityNameFirstUpper} = async function (db: Surreal, ${entityName}: ${entityCreateTypeName}) {
   const payload = ${entitySchemaName}.parse(${entityName});
 
-  const result = await db.query<[${entityTypeName}]>("CREATE ONLY ${tableName} CONTENT $payload", { payload });
+  const result = await db.query("CREATE ONLY ${tableName} CONTENT $payload", { payload });
 
-  if(result[0].status==="ERR") {
-    throw new Error('[DB_ERR] '+result[0].result)
-  }
-
-  return result[0].result as ${entityTypeName};
+  return result[0] as ${entityTypeName};
 };
 `
 }

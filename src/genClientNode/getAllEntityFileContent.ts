@@ -11,13 +11,9 @@ import type { ${entityTypeName} } from "../../schema/${entityName}/${entityName}
 
 export const getAll${entityNameFirstUpper}s = async function (db: Surreal) {
 
-  const result = await db.query<[${entityTypeName}[]]>("SELECT * FROM ${tableName}", {});
+  const result = await db.query("SELECT * FROM ${tableName}", {});
 
-  if(result[0].status==="ERR") {
-    throw new Error('[DB_ERR] '+result[0].result)
-  }
-
-  return result[0].result;
+  return result[0] as ${entityTypeName}[];
 };
 `
 }

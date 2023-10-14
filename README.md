@@ -51,24 +51,53 @@ Configuring options for this tool is flexible and convenient. You have two main 
 And the best part? You can use both methods simultaneously if it suits your needs. In such cases, the tool intelligently merges the parameters, giving priority to the ones provided through the CLI.
 This means you have complete control over your configuration, adapting it to your preferences effortlessly.
 
+Decide for which lib do you want to generate your client.
+Currently available:
+
+- surrealdb.js
+- surrealdb.node
+
 ```bash
 Usage: surql-gen [options]
 
 Generate zod schema and typescript client code from running Surreal database
 
 Options:
-  -V, --version                          output the version number
-  -f, --file [schemaFile]                a SurrealQL file containing the definitions (default: "myschema.surql")
-  -c, --config [configFile]              SurrealDB connection url (default: "surql-gen.json")
-  -s, --surreal [surreal]                SurrealDB connection url (default: "ws://127.0.0.1:8000")
-  -u, --username [username]              auth username (default: "root")
-  -p, --password [password]              auth password (default: "root")
-  -n, --ns [ns]                          the namspace (default: "test")
-  -d, --db [db]                          the database (default: "test")
-  -o, --outputFolder [outputFolder]      output folder (default: "client_generated")
-  -g, --generateClient [generateClient]  generate client (default: true)
-  -h, --help                             display help for command
+  -V, --version         output the version number
+  -f, --schemaFile      a SurrealQL file containing the definitions (default: myschema.surql)
+  -c, --config          config file (default: surql-gen.json)
+  -s, --surreal         SurrealDB connection url (default: memory)
+  -u, --username        auth username (default: root)
+  -p, --password        auth password (default: root)
+  -n, --ns              the namspace (default: test)
+  -d, --db              the database (default: test)
+  -o, --outputFolder    output folder (default: client_generated)
+  -g, --generateClient  generate client (default: true)
+  -l, --lib             library to be used in client (default: surrealdb.js)
+  -h, --help            display help for command
 ```
+
+## Config file
+
+You can provide the configuration via a config file.
+The config file is using same paramaters as the cli.
+
+Example:
+
+```json
+{
+  "schemaFile": "schema.surql",
+  "surreal": "memory",
+  "username": "root",
+  "password": "secret_password",
+  "ns": "my_namespace",
+  "db": "my_database",
+  "outputFolder": "./out",
+  "generateClient": true,
+  "clientLib": "surrealdb.js"
+}
+```
+
 
 ## Code Generation Structure
 

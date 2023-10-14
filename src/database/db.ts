@@ -1,4 +1,4 @@
-import { Surreal } from 'surrealdb.js'
+import { Surreal } from 'surrealdb.node'
 
 import { Config } from '../config/types.js'
 
@@ -32,6 +32,5 @@ export const insertDefinitions = async (content: string) => {
 }
 
 export const closeDb = async () => {
-  db?.close()
   console.log('database closed')
 }
