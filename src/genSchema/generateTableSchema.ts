@@ -10,7 +10,6 @@ import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
 import { getSchemaStringFromDefinition } from './getSchemaStringFromDefinition.js'
 
 export const generateTableSchema = async (outFolder: string, tableNames: string[]) => {
-
   await mkdirp(outFolder)
   const propTypeFilename = resolve(outFolder, `PropType.ts`)
   if (!existsSync(propTypeFilename)) {
@@ -31,20 +30,20 @@ export const generateTableSchema = async (outFolder: string, tableNames: string[
     await rimraf(tableSchemaFolder)
     await mkdirp(tableSchemaFolder)
 
-    const fields = await getTableFields(tableName)
+    const fields = await getTableFields(name)
 
     const genSchemaFileName = resolve(tableSchemaFolder, `${toCamelCase(tableName)}SchemaGen.ts`)
     const genSchemaFile = createWriteStream(genSchemaFileName)
 
     const inputFields = Object.entries(fields)
-      .map(([name, definition]) => {
-        return ` "${name}": ${getSchemaStringFromDefinition(definition, true)}`
+      .map(([fname, definition]) => {
+        return ` "${fname}": ${getSchemaStringFromDefinition(definition, true)}`
       })
       .join(',\n')
 
     const outputFields = Object.entries(fields)
-      .map(([name, definition]) => {
-        return ` "${name}": ${getSchemaStringFromDefinition(definition, false)}`
+      .map(([fname, definition]) => {
+        return ` "${fname}": ${getSchemaStringFromDefinition(definition, false)}`
       })
       .join(',\n')
 
