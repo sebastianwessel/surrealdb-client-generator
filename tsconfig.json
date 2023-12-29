@@ -15,7 +15,8 @@
     "target": "es2022",
     "types": [
       "vitest/globals"
-    ]
+    ],
+    "lib": ["ES2023.Array"]
   },
   "ts-node": {
     "esm": true,

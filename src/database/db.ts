@@ -28,7 +28,7 @@ export const connectDb = async (config: Config) => {
 export const insertDefinitions = async (content: string) => {
   const db = getDb()
   const result = await db.query(content, {})
-  console.log('insertDefinitions:', JSON.stringify(result, null, 2))
+  // console.log('insertDefinitions:', JSON.stringify(result, null, 2))
 }
 
 export const closeDb = async () => {
