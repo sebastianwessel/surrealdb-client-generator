@@ -16,7 +16,7 @@ const main = async () => {
   program
     .name('surql-gen')
     .description('Generate zod schema and typescript client code from running Surreal database')
-    .version('1.0.0')
+    .version('1.1.0')
 
   program
     .option('-f, --schemaFile [schemaFile]', 'a SurrealQL file containing the definitions', 'myschema.surql')
@@ -97,6 +97,11 @@ const main = async () => {
 
   try {
     const tableNames = await getAllTableNames()
+
+    console.log(
+      '👉 Found the following tables:',
+      tableNames.toSorted().map((t) => `\n  - ${t}`).join('')
+    )
 
     await generateTableSchema(resolve(__dirname, config.outputFolder), tableNames)
 
