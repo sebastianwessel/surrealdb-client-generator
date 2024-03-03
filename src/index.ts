@@ -62,7 +62,7 @@ const main = async () => {
     }
   }
 
-  const config = configFileSchema.parse({ ...fileContent, ...options })
+  const config = configFileSchema.parse({ ...options, ...fileContent })
 
   await connectDb(config)
   if (config.schemaFile) {
