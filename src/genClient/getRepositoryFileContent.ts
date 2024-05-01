@@ -1,5 +1,5 @@
 export const getRepositoryContent = (lib: string, entityName: string) => {
-  return `
+	return `
 import type { Surreal } from "${lib}"
 
 import { create${entityName} } from "./create${entityName}.js"

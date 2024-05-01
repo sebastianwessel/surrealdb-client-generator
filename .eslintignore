@@ -1,7 +1,0 @@
-**/lib/*
-docs
-coverage
-node_modules
-*.d.ts
-client_generated2
-dist

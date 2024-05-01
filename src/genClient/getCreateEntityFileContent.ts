@@ -1,12 +1,12 @@
 import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
 
 export const getCreateEntityFileContent = (lib: string, entityName: string, tableName: string) => {
-  const entitySchemaName = `${entityName}CreateSchema`
-  const entityNameFirstUpper = `${toUpperCamelCase(entityName)}`
-  const entityTypeName = `${toUpperCamelCase(entityName)}`
-  const entityCreateTypeName = `${toUpperCamelCase(entityName)}Create`
+	const entitySchemaName = `${entityName}CreateSchema`
+	const entityNameFirstUpper = `${toUpperCamelCase(entityName)}`
+	const entityTypeName = `${toUpperCamelCase(entityName)}`
+	const entityCreateTypeName = `${toUpperCamelCase(entityName)}Create`
 
-  return `
+	return `
 import type { Surreal } from "${lib}";
 
 import { ${entitySchemaName} } from "../../schema/${entityName}/${entityName}Schema.js";

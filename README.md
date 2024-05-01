@@ -98,7 +98,6 @@ Example:
 }
 ```
 
-
 ## Code Generation Structure
 
 The generated code is organized into two distinct parts for your convenience:

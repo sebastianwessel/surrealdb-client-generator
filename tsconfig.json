@@ -1,33 +1,29 @@
 {
-  "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "inlineSources": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "noUncheckedIndexedAccess": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2022",
-    "types": [
-      "vitest/globals"
-    ]
-  },
-  "ts-node": {
-    "esm": true,
-    "files": true,
-    "compilerOptions": {
-      "target": "esnext",
-      "module": "nodenext",
-      "moduleResolution": "nodenext",
-      "esModuleInterop": true,
-      "types": [
-        "vitest/globals"
-      ]
-    }
-  }
+	"compilerOptions": {
+		"declaration": true,
+		"declarationMap": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"inlineSources": true,
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"noUncheckedIndexedAccess": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"target": "es2022",
+		"types": ["vitest/globals"]
+	},
+	"ts-node": {
+		"esm": true,
+		"files": true,
+		"compilerOptions": {
+			"target": "esnext",
+			"module": "nodenext",
+			"moduleResolution": "nodenext",
+			"esModuleInterop": true,
+			"types": ["vitest/globals"]
+		}
+	}
 }
