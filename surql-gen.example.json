@@ -1,0 +1,11 @@
+{
+	"schemaFile": "schema.surql",
+	"surreal": "http://localhost:8000",
+	"username": "root",
+	"password": "root",
+	"ns": "my_namespace",
+	"db": "my_database",
+	"outputFolder": "./out",
+	"generateClient": true,
+	"lib": "surrealdb.js"
+}
