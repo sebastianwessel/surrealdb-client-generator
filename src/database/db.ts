@@ -1,4 +1,4 @@
-import { Surreal } from 'surrealdb.node'
+import { Surreal } from 'surrealdb.js'
 
 import type { Config } from '../config/types.js'
 
@@ -15,9 +15,11 @@ export const connectDb = async (config: Config) => {
 	console.log('connect to database')
 	db = new Surreal()
 	await db.connect(config.surreal)
-	await db.signin({
-		namespace: config.ns,
+  await db.use({
+    namespace: config.ns,
 		database: config.db,
+  })
+	await db.signin({
 		username: config.username,
 		password: config.password,
 	})
@@ -26,7 +28,7 @@ export const connectDb = async (config: Config) => {
 export const insertDefinitions = async (content: string) => {
 	const db = getDb()
 	const result = await db.query(content, {})
-	console.log('insertDefinitions:', JSON.stringify(result, null, 2))
+	console.debug('insertDefinitions:', JSON.stringify(result, null, 2))
 }
 
 export const closeDb = async () => {

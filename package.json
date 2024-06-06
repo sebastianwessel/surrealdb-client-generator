@@ -1,12 +1,22 @@
 {
 	"name": "@sebastianwessel/surql-gen",
 	"private": false,
-	"version": "1.1.3",
+	"version": "2.0.0",
 	"engines": {
 		"node": ">=18"
 	},
 	"description": "A small tool which generates a typescript client for SurrealDB based on the schema of a given database",
-	"keywords": ["typescript", "surrealdb", "client", "javascript", "zod", "orm", "database", "generator", "tool"],
+	"keywords": [
+		"typescript",
+		"surrealdb",
+		"client",
+		"javascript",
+		"zod",
+		"orm",
+		"database",
+		"generator",
+		"tool"
+	],
 	"author": {
 		"name": "Sebastian Wessel",
 		"url": "https://github.com/sebastianwessel"
@@ -21,30 +31,32 @@
 		"email": "project@hostname.com"
 	},
 	"license": "MIT",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"bin": {
 		"surql-gen": "./dist/commonjs/index.js"
 	},
 	"scripts": {
 		"start": "node dist/esm/index.js",
-		"dev": "ts-node src/index.ts",
+		"dev": "tsx src/index.ts",
 		"lint": "npx @biomejs/biome check --apply .",
 		"test": "vitest",
 		"prepare": "tshy"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.7.2",
-		"ts-node": "^10.9.2",
+		"@biomejs/biome": "1.8.0",
 		"tshy": "^1.11.1",
+		"tsx": "^4.12.0",
 		"typescript": "^5.3.3",
-		"vitest": "^1.3.1"
+		"vitest": "^1.6.0"
 	},
 	"dependencies": {
-		"commander": "^12.0.0",
+		"commander": "^12.1.0",
 		"mkdirp": "^3.0.1",
-		"rimraf": "^5.0.5",
-		"surrealdb.node": "^0.3.0",
-		"zod": "^3.22.4"
+		"rimraf": "^5.0.7",
+		"surrealdb.js": "^1.0.0-beta.8",
+		"zod": "^3.23.8"
 	},
 	"tshy": {
 		"exports": {

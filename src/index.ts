@@ -19,9 +19,9 @@ const main = async () => {
 		.version('1.0.0')
 
 	program
-		.option('-f, --schemaFile [schemaFile]', 'a SurrealQL file containing the definitions', 'myschema.surql')
+		.option('-f, --schemaFile [schemaFile]', 'a SurrealQL file containing the definitions')
 		.option('-c, --config [config]', 'config file', 'surql-gen.json')
-		.option('-s, --surreal [surreal]', 'SurrealDB connection url', 'memory')
+		.option('-s, --surreal [surreal]', 'SurrealDB connection url', 'http://localhost:8000')
 		.option('-u, --username [username]', 'auth username', 'root')
 		.option('-p, --password [password]', 'auth password', 'root')
 		.option('-n, --ns [ns]', 'the namespace', 'test')
@@ -127,6 +127,8 @@ const main = async () => {
 	console.log('')
 	console.log('Good luck with your project. 👋 Cheers, and happy coding!')
 	console.log('')
+
+  process.exit()
 }
 
 main()

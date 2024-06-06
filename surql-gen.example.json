@@ -1,5 +1,5 @@
 {
-	"schemaFile": "schema.surql",
+	"schemaFile": "example.surql",
 	"surreal": "http://localhost:8000",
 	"username": "root",
 	"password": "root",

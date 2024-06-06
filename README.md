@@ -1,28 +1,35 @@
- # SurrealDB Client & Zod Schema Generator
+# SurrealDB Client & Zod Schema Generator
 
  SurrealDB Schema Generator is a handy tool that simplifies the process of generating [zod](http://zod.dev) schemas and TypeScript clients for [SurrealDB](http://surrealdb.com) based on your provided database schema.
  Its primary purpose is to offer a fundamental starting point, not to replace a full-blown automated ORM.
 
- ## Features
+## Features
 
- - Generate zod schemas and TypeScript clients for SurrealDB.
- - Utilize your existing database schema created with excellent tools like [surrealist.app](https://surrealist.app/).
- - Benefit from a user-friendly **Designer** in Surrealist to craft your data model effortlessly.
- - Export your schema from Surrealist and use it with this tool.
- - Choose to generate only zod schemas or include a basic TypeScript client.
- - Utilize zod schemas for [CIRQL](https://cirql.starlane.studio/) if needed.
+- Generate zod schemas and TypeScript clients for SurrealDB.
+- Utilize your existing database schema created with excellent tools like [surrealist.app](https://surrealist.app/).
+- Benefit from a user-friendly **Designer** in Surrealist to craft your data model effortlessly.
+- Export your schema from Surrealist and use it with this tool.
+- Choose to generate only zod schemas or include a basic TypeScript client.
+- Utilize zod schemas for [CIRQL](https://cirql.starlane.studio/) if needed.
 
- ## How It Works
+## 🚨 Warning Version 2.x
 
- SurrealDB Schema Generator connects to your specified database and extracts the provided `DEFINE` information.
- Additionally, you can provide a SurrealQL file containing conditions.
- Before fetching the `DEFINE` information, the tool queries the SurrealDB instance using the conditions specified in the file.
+Version 2 has breaking changes!  
+The tool now uses `surrealdb.js` instead of `surrealdb.node` for interacting with a SurrealDB instance.
 
- **Please Note:**
- The information is not directly extracted from the provided file - it is written to the database in advance.
+The change was made, because it seems that `surrealdb.js` is closer to the SurrealDB development process and more up to date in general.
 
- Enjoy using SurrealDB Schema Generator to streamline your schema generation process for SurrealDB and zod.
- It's designed to make your life easier when working with these powerful technologies.
+This means, the option "memory" for connections is no longer available, and you need to run against a real running SurrealDB instance (use docker).
+
+## How It Works
+
+1. SurrealDB Schema Generator connects to your specified database
+2. If you provide a surql schema file, the SurrealQL schema is written to the database
+3. The generator extracts the `DEFINE` information from the connected database
+4. Based on the definitions found in the database, the zod schemas are generated
+
+Enjoy using SurrealDB Schema Generator to streamline your schema generation process for SurrealDB and zod.
+It's designed to make your life easier when working with these powerful technologies.
 
 ## Installation
 
@@ -32,13 +39,13 @@ You can directly execute the generation:
 npx surql-gen
 ```
 
-Or you can install the generator as depenedency into your project.
+Or you can install the generator as dependency into your project.
 
 ```bash
 npm i -D @sebastianwessel/surql-gen
 ```
-In case you install the generator as dependency or you installed it globally, you can call directly `surql-gen`
 
+In case you install the generator as dependency or you installed it globally, you can call directly `surql-gen`
 
 ## How to Use
 
@@ -65,8 +72,8 @@ Generate zod schema and typescript client code from running Surreal database
 Options:
   -V, --version         output the version number
   -f, --schemaFile      a SurrealQL file containing the definitions (default: myschema.surql)
-  -c, --config          config file (default: surql-gen.json)
-  -s, --surreal         SurrealDB connection url (default: memory)
+  -c, --config           config file (default: surql-gen.json)
+  -s, --surreal         SurrealDB connection url (default: http://localhost:8000)
   -u, --username        auth username (default: root)
   -p, --password        auth password (default: root)
   -n, --ns              the namspace (default: test)
@@ -118,7 +125,6 @@ They serve as safe spaces for your customizations, changes, and enhancements:
 
 **Customization Freedom**: You can confidently make modifications and enhancements in these subfolders without worrying about them being altered by future executions of the tool.
 This design allows you to tailor the generated code to your project's specific requirements, ensuring a seamless development experience.
-
 
 ---
 

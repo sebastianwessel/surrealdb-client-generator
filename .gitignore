@@ -92,3 +92,4 @@ client_generated/
 .tshy-build-tmp
 dist
 playground.ts
+out
