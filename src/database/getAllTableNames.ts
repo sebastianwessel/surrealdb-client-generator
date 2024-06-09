@@ -3,16 +3,16 @@ import { getDb } from './db.js'
 export const getAllTableNames = async () => {
 	const db = getDb()
 
-  type InfoDB = {
-    analyzers: Record<string,unknown>
-    functions: Record<string,unknown>
-    models:  Record<string,unknown>
-    params: Record<string,unknown>
-    scopes: Record<string,unknown>
-    tables: Record<string,string>
-    tokens: Record<string,unknown>
-    users: Record<string,unknown>
-  }[]
+	type InfoDB = {
+		analyzers: Record<string, unknown>
+		functions: Record<string, unknown>
+		models: Record<string, unknown>
+		params: Record<string, unknown>
+		scopes: Record<string, unknown>
+		tables: Record<string, string>
+		tokens: Record<string, unknown>
+		users: Record<string, unknown>
+	}[]
 
 	const result = await db.query<InfoDB>('INFO FOR DB;', {})
 	if (!result[0]?.tables) {

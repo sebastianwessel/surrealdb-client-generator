@@ -8,7 +8,6 @@ import { configFileSchema } from './config/configFileSchema.js'
 import { closeDb, connectDb, insertDefinitions } from './database/db.js'
 import { getAllTableNames } from './database/getAllTableNames.js'
 import { generateClientJs } from './genClient/generateClientJs.js'
-import { generateClientNode } from './genClientNode/generateClientNode.js'
 import { generateTableSchema } from './genSchema/generateTableSchema.js'
 import { printSorry } from './helper/printSorry.js'
 
@@ -28,7 +27,6 @@ const main = async () => {
 		.option('-d, --db [db]', 'the database', 'test')
 		.option('-o, --outputFolder [outputFolder]', 'output folder', 'client_generated')
 		.option('-g, --generateClient [generateClient]', 'generate client', true)
-		.option('-l, --lib [lib]', 'library to be used in client', 'surrealdb.js')
 
 	program.parse()
 
@@ -101,13 +99,7 @@ const main = async () => {
 		await generateTableSchema(resolve(__dirname, config.outputFolder), tableNames)
 
 		if (config.generateClient) {
-			if (config.lib === 'surrealdb.js') {
-				await generateClientJs(resolve(__dirname, config.outputFolder), tableNames, config.lib)
-			}
-
-			if (config.lib === 'surrealdb.node') {
-				await generateClientNode(resolve(__dirname, config.outputFolder), tableNames, config.lib)
-			}
+			await generateClientJs(resolve(__dirname, config.outputFolder), tableNames, 'surrealdb.js')
 		}
 	} catch (error) {
 		printSorry(error)
@@ -128,7 +120,7 @@ const main = async () => {
 	console.log('Good luck with your project. 👋 Cheers, and happy coding!')
 	console.log('')
 
-  process.exit()
+	process.exit()
 }
 
 main()

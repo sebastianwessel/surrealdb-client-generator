@@ -1,7 +1,7 @@
 {
 	"name": "@sebastianwessel/surql-gen",
 	"private": false,
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"engines": {
 		"node": ">=18"
 	},
@@ -40,7 +40,8 @@
 	"scripts": {
 		"start": "node dist/esm/index.js",
 		"dev": "tsx src/index.ts",
-		"lint": "npx @biomejs/biome check --apply .",
+		"build": "tshy",
+		"lint": "npx @biomejs/biome check --write .",
 		"test": "vitest",
 		"prepare": "tshy"
 	},

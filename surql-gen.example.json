@@ -6,6 +6,5 @@
 	"ns": "my_namespace",
 	"db": "my_database",
 	"outputFolder": "./out",
-	"generateClient": true,
-	"lib": "surrealdb.js"
+	"generateClient": true
 }

@@ -7,16 +7,11 @@ import { rimraf } from 'rimraf'
 import { getTableFields } from '../database/getTableFields.js'
 import { toCamelCase } from '../helper/toCamelCase.js'
 import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
-import { getSchemaStringFromDefinition } from './getSchemaStringFromDefinition.js'
+import { getDetailsFromDefinition } from './getDetailsFromDefinition.js'
+import { mergeNested } from './mergeNested.js'
 
 export const generateTableSchema = async (outFolder: string, tableNames: string[]) => {
 	await mkdirp(outFolder)
-	const propTypeFilename = resolve(outFolder, 'PropType.ts')
-	if (!existsSync(propTypeFilename)) {
-		const tFile = createWriteStream(propTypeFilename)
-		tFile.write('export type PropType<TObj, TProp extends keyof TObj> = TObj[TProp];')
-		tFile.close()
-	}
 
 	const genSchemaFolder = resolve(outFolder, '_generated')
 
@@ -35,17 +30,9 @@ export const generateTableSchema = async (outFolder: string, tableNames: string[
 		const genSchemaFileName = resolve(tableSchemaFolder, `${toCamelCase(tableName)}SchemaGen.ts`)
 		const genSchemaFile = createWriteStream(genSchemaFileName)
 
-		const inputFields = Object.entries(fields)
-			.map(([fname, definition]) => {
-				return ` "${fname}": ${getSchemaStringFromDefinition(definition, true)}`
-			})
-			.join(',\n')
+		const inputFields = mergeNested(fields, true)
 
-		const outputFields = Object.entries(fields)
-			.map(([fname, definition]) => {
-				return ` "${fname}": ${getSchemaStringFromDefinition(definition, false)}`
-			})
-			.join(',\n')
+		const outputFields = mergeNested(fields, false)
 
 		genSchemaFile.write(
 			`// ====================
@@ -56,14 +43,10 @@ export const generateTableSchema = async (outFolder: string, tableNames: string[
 import { z } from "zod";
 
 // the create schema for table ${name}
-export const ${tableName}InputSchemaGen = {
-${inputFields}
-};
+export const ${tableName}InputSchemaGen = ${inputFields};
 
 // the select schema for table ${name}
-export const ${tableName}OutputSchemaGen = {
-${outputFields}
-};
+export const ${tableName}OutputSchemaGen = ${outputFields};
 
 `,
 		)
@@ -85,19 +68,17 @@ import { z } from "zod";
 import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated/${tableName}/${tableName}SchemaGen.js";
 
 // payload schema for creating a new ${name} entity
-export const ${tableName}CreateSchema = z.object({
-  ...${tableName}InputSchemaGen
+export const ${tableName}CreateSchema = ${tableName}InputSchemaGen.merge(z.object({
   // add your custom fields here, which are not part of SurrealDB table schema
   // they are not overwritten by the next run
-})
+      }))
 
 // payload schema for fetching a ${name} entity
-export const ${tableName}Schema = z.object({
-  id: z.string().startsWith("${name}:"),
-  ...${tableName}OutputSchemaGen
+export const ${tableName}Schema = ${tableName}OutputSchemaGen.merge(z.object({
+  id: z.object({ tb: z.string(), id: z.string() }),
   // add your custom fields here, which are not part of SurrealDB table schema
   // they are not overwritten by the next run
-})
+      }))
 `)
 			sFile.close()
 			console.log(` ✅ [${tableName}]: ${tableName}Schema.ts`)
@@ -112,6 +93,7 @@ export const ${tableName}Schema = z.object({
 			tFile.write(`/* Place your custom changes here */
 
 import { z } from "zod";
+import { type RecordId} from "surrealdb.js";
 
 import { ${tableName}CreateSchema, ${tableName}Schema } from "./${tableName}Schema.js";
 
@@ -119,7 +101,7 @@ import { ${tableName}CreateSchema, ${tableName}Schema } from "./${tableName}Sche
 export type ${toUpperCamelCase(tableName)}Create = z.input<typeof ${tableName}CreateSchema>
 
 // the select type for table ${name}
-export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema>
+export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema> & {id: RecordId<string>}
       `)
 			tFile.close()
 			console.log(` ✅ [${tableName}]: ${tableName}Types.ts`)

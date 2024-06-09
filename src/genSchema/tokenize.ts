@@ -1,53 +1,99 @@
-const getScope = (value: string) => {
-	switch (value.toUpperCase()) {
-		case 'DEFINE':
-			return null
-		case 'FIELD':
-			return 'name'
-		case 'ON':
-			return null
-		case 'TABLE':
-			return 'table'
-		case 'TYPE':
-			return 'fieldType'
-		case 'VALUE':
-			return 'value'
-		case 'DEFAULT':
-			return 'defaultValue'
-		case 'ASSERT':
-			return 'assert'
-		case 'INSIDE':
-			return 'inside'
-		default:
-			return undefined
-	}
+export type Permissions = {
+	none?: boolean
+	full?: boolean
+	select?: string
+	create?: string
+	update?: string
+	delete?: string
+}
+export interface TokenizedDefinition {
+	name: string
+	table: string
+	flexible?: boolean
+	type?: string
+	default?: string
+	readonly?: boolean
+	value?: string
+	assert?: string
+	permissions?: Permissions
 }
 
-export const tokenize = (query: string) => {
-	const clean = query.trim().replace(/;$/, '')
-	const wordArray = clean.split(' ')
-
-	const result: Record<string, string> = {
+export const tokenize = (definition: string): TokenizedDefinition => {
+	const result: TokenizedDefinition = {
 		name: '',
 		table: '',
 	}
 
-	let scope: ReturnType<typeof getScope>
-	for (const word of wordArray) {
-		const c = getScope(word)
-		if (c) {
-			scope = c
-			result[scope] = `${result[scope] ?? ''} ${word}`.trim()
+	const nameMatch = definition.match(/DEFINE FIELD(?: IF NOT EXISTS)? (.*) ON(?: TABLE)? (\w+)/im)
+	if (nameMatch) {
+		result.name = nameMatch[1] as string
+		result.table = nameMatch[2] as string
+	} else {
+		console.log('==== no match')
+		console.error(definition)
+	}
+
+	if (definition.match(/FLEXIBLE TYPE/i)) {
+		result.flexible = true
+		const typeMatch = definition.match(/FLEXIBLE TYPE \b([^\s]+)/im)
+		if (typeMatch) {
+			result.type = typeMatch[1]
+		}
+	} else {
+		const typeMatch = definition.match(/TYPE \b([^\s]+)/im)
+		if (typeMatch) {
+			result.type = typeMatch[1]
 		}
 	}
 
-	return result as {
-		name: string
-		table: string
-		fieldType?: string
-		assert?: string
-		inside?: string
-		value?: string
-		defaultValue?: string
+	const defaultMatch = definition.match(/DEFAULT (\S+)/im)
+	if (defaultMatch) {
+		result.default = defaultMatch[1]
 	}
+
+	if (definition.match(/READONLY/im)) {
+		result.readonly = true
+	}
+
+	const valueMatch = definition.match(/VALUE ([^"]+)/im)
+	if (valueMatch) {
+		result.value = valueMatch[1]
+	}
+
+	const assertMatch = definition.match(/ASSERT ([^"]+)/im)
+	if (assertMatch) {
+		result.assert = assertMatch[1]
+	}
+
+	const permissions: Permissions = {}
+	if (definition.match(/PERMISSIONS NONE/im)) {
+		permissions.none = true
+	} else if (definition.match(/PERMISSIONS FULL/im)) {
+		permissions.full = true
+		const selectMatch = definition.match(/FOR select "([^"]+)"/im)
+		if (selectMatch) {
+			permissions.select = selectMatch[1]
+		}
+
+		const createMatch = definition.match(/FOR create "([^"]+)"/i)
+		if (createMatch) {
+			permissions.create = createMatch[1]
+		}
+
+		const updateMatch = definition.match(/FOR update "([^"]+)"/i)
+		if (updateMatch) {
+			permissions.update = updateMatch[1]
+		}
+
+		const deleteMatch = definition.match(/FOR delete "([^"]+)"/i)
+		if (deleteMatch) {
+			permissions.delete = deleteMatch[1]
+		}
+	}
+
+	if (Object.keys(permissions).length > 0) {
+		result.permissions = permissions
+	}
+
+	return result
 }

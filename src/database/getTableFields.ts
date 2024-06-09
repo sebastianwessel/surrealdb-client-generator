@@ -1,11 +1,11 @@
 import { getDb } from './db.js'
 
 type InfoTable = {
-  events: Record<string,unknown>
-  fields: Record<string,string>
-  indexes: Record<string,unknown>
-  lives: Record<string,unknown>
-  tables: Record<string,unknown>
+	events: Record<string, unknown>
+	fields: Record<string, string>
+	indexes: Record<string, unknown>
+	lives: Record<string, unknown>
+	tables: Record<string, unknown>
 }[]
 
 export const getTableFields = async (tableName: string) => {

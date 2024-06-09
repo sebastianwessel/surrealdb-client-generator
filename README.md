@@ -126,6 +126,33 @@ They serve as safe spaces for your customizations, changes, and enhancements:
 **Customization Freedom**: You can confidently make modifications and enhancements in these subfolders without worrying about them being altered by future executions of the tool.
 This design allows you to tailor the generated code to your project's specific requirements, ensuring a seamless development experience.
 
+## Mapping
+
+### Basic Type
+
+| SurrealQL | Zod (input)  | Zod (output) |
+|-----------|---|---|
+| TYPE number  | z.number()  | z.number() |
+| TYPE option\<number\>  | z.number().optional()  | z.number().optional() |
+| TYPE string  | z.string()  | z.string() |
+| TYPE option\<string\>  | z.string().optional()  | z.string().optional() |
+| TYPE datetime  | z.string().datetime()  | z.string().datetime() |
+| TYPE option\<datetime\>  | z.string().datetime().optional()  | z.string().datetime().optional() |
+| TYPE bool  | z.boolean()  | z.boolean() |
+| TYPE option\<bool\>  | z.boolean().optional()  | z.boolean().optional() |
+| TYPE object  | z.object({})  | z.object({}) |
+| TYPE option\<object\>  | z.object({}).optional()  | z.object({}).optional() |
+| TYPE array  | z.array()  | z.array(z.any()) |
+| TYPE option\<array\>  | z.array(z.any()).optional()  | z.array(z.any()).optional() |
+| TYPE array\<string\>  | z.array()  | z.array(z.string()) |
+| TYPE option\<array\<string\>\>  | z.array(z.string()).optional()  | z.array(z.string()).optional() |
+| TYPE array\<number\>  | z.array()  | z.array(z.number()) |
+| TYPE option\<array\<number\>\>  | z.array(z.number()).optional()  | z.array(z.number()).optional() |
+| TYPE array\<bool\>  | z.array()  | z.array(z.boolean()) |
+| TYPE option\<array\<bool\>\>  | z.array(z.boolean()).optional()  | z.array(z.boolean()).optional() |
+| TYPE record  | z.any()  | z.any() |
+| TYPE option\<record\>  | z.any()  | z.any() |
+
 ---
 
 If you like this tool, I please you, to give a star ⭐️ on github:

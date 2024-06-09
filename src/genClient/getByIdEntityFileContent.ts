@@ -6,21 +6,17 @@ export const getByIdEntityFileContent = (lib: string, entityName: string) => {
 	const entitySchemaName = `${entityName}Schema`
 
 	return `
-import type { Surreal } from "${lib}";
+import { RecordId, type Surreal } from "${lib}";
 
 import { ${entitySchemaName} } from "../../schema/${entityName}/${entityName}Schema.js";
 import type { ${entityTypeName} } from "../../schema/${entityName}/${entityName}Types.js";
-import type { PropType } from '../../PropType.ts'
 
-export const get${entityNameFirstUpper}ById = async function (db: Surreal, id: PropType<${entityNameFirstUpper}, "id">) {
+export const get${entityNameFirstUpper}ById = async function (db: Surreal, id: RecordId<string>) {
   const key = ${entitySchemaName}.pick({ id: true }).parse({ id });
-  const result = await db.query<[${entityTypeName}]>("SELECT * FROM ONLY " + key.id, {});
 
-  if(result[0].status==="ERR") {
-    throw new Error('[DB_ERR] '+result[0].result)
-  }
+  const result = await db.query<[${entityTypeName}|undefined]>("SELECT * FROM ONLY $id", { id });
 
-  return result[0].result;
+  return result[0];
 };
 `
 }

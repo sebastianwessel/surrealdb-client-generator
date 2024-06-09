@@ -9,5 +9,4 @@ export const configFileSchema = z.object({
 	password: z.string().default('root'),
 	outputFolder: z.string().default('client_generated'),
 	generateClient: z.boolean().default(true),
-	lib: z.enum(['surrealdb.js', 'surrealdb.node']).default('surrealdb.js'),
 })
