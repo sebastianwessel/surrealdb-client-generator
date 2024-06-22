@@ -48,6 +48,12 @@ describe('getDetailsFromDefinition', () => {
 
 			expect(result.skip).toBeTruthy()
 		})
+
+		it('adds passthrough to the schema if FLEXIBLE is set', () => {
+			const result = getDetailsFromDefinition('DEFINE FIELD metadata ON TABLE user FLEXIBLE TYPE object', isInputSchema)
+
+			expect(result.zodString).toBe('z.object({}).passthrough()')
+		})
 	})
 
 	describe('output schema', () => {
@@ -97,6 +103,12 @@ describe('getDetailsFromDefinition', () => {
 
 			expect(result.zodString).toBe('z.number()')
 			expect(result.skip).toBeFalsy()
+		})
+
+		it('adds passthrough to the schema if FLEXIBLE is set', () => {
+			const result = getDetailsFromDefinition('DEFINE FIELD metadata ON TABLE user FLEXIBLE TYPE object', isInputSchema)
+
+			expect(result.zodString).toBe('z.object({}).passthrough()')
 		})
 	})
 })
