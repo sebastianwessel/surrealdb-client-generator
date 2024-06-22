@@ -56,6 +56,20 @@ describe('Field schema generation', () => {
 
 			expect(getZodTypeFromQLType(result, false)).toBe('z.number()')
 		})
+
+		it('handles futures', () => {
+			const query = 'DEFINE FIELD numField ON TABLE example TYPE number VALUE <future> {}'
+			const result = tokenize(query)
+
+			expect(result).toStrictEqual({
+				table: 'example',
+				name: 'numField',
+				type: 'number',
+				value: '<future> {}',
+			})
+
+			expect(getZodTypeFromQLType(result, false)).toBe('z.number()')
+		})
 	})
 
 	describe('string', () => {

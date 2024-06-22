@@ -1,13 +1,13 @@
 import { type TokenizedDefinition, tokenize } from './tokenize.js'
 
-const optionalTypeRegex = /option<([^>]*)>/im
+const _optionalTypeRegex = /option<([^>]*)>/im
 const stringAssertionRegex = /\sstring::is::([^)]*)\(/im
-const allInsideAssertionRegex = /ASSERT (?:.*)ALLINSIDE (\[.*\])/im
+const _allInsideAssertionRegex = /ASSERT (?:.*)ALLINSIDE (\[.*\])/im
 const insideAssertionRegex = /ASSERT (?:.*)INSIDE (\[.*\])/im
 
 const typeRegex = /(?:option<)?(\w+)(?:<)?(\w+)?/i
 
-export type FieldDetail = TokenizedDefinition & { zodString: string }
+export type FieldDetail = TokenizedDefinition & { zodString: string; skip: boolean }
 
 const getStringType = (tokens: TokenizedDefinition): string => {
 	const result = 'z.string()'
@@ -76,6 +76,7 @@ const makeOptional = (schema: string, tokens: TokenizedDefinition, isInputSchema
 
 export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema: boolean, subSchema?: string) => {
 	const match = tokens.type?.match(typeRegex)
+
 	if (match) {
 		switch (match[1]?.toLowerCase()) {
 			case 'string':
@@ -109,14 +110,16 @@ export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema:
 	return 'z.any()'
 }
 
-export const getDetailsFromDefinition = (definition: string, isInputSchema: boolean): FieldDetail => {
-	const schema = 'z.any()'
-	const isOptional = false
+export const shouldFieldBeSkipped = (tokens: TokenizedDefinition, isInputSchema: boolean): boolean => {
+	return !!tokens.value?.trim().toLowerCase().startsWith('<future>') && isInputSchema
+}
 
+export const getDetailsFromDefinition = (definition: string, isInputSchema: boolean): FieldDetail => {
 	const tokens = tokenize(definition)
 
 	return {
 		...tokens,
 		zodString: getZodTypeFromQLType(tokens, isInputSchema),
+		skip: shouldFieldBeSkipped(tokens, isInputSchema),
 	}
 }
