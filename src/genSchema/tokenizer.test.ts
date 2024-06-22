@@ -391,7 +391,7 @@ describe('Field schema generation', () => {
 				type: 'array',
 			})
 
-			expect(getZodTypeFromQLType(result, false)).toBe('z.array(z.any())')
+			expect(getZodTypeFromQLType(result, false)).toBe('z.array(z.unknown())')
 		})
 
 		it('optional', () => {
@@ -404,7 +404,7 @@ describe('Field schema generation', () => {
 				type: 'option<array>',
 			})
 
-			expect(getZodTypeFromQLType(result, false)).toBe('z.array(z.any()).optional()')
+			expect(getZodTypeFromQLType(result, false)).toBe('z.array(z.unknown()).optional()')
 		})
 
 		it('is optional for input if default is set', () => {
@@ -418,7 +418,7 @@ describe('Field schema generation', () => {
 				default: '[1,2,3]',
 			})
 
-			expect(getZodTypeFromQLType(result, true)).toBe('z.array(z.any()).optional()')
+			expect(getZodTypeFromQLType(result, true)).toBe('z.array(z.unknown()).optional()')
 		})
 
 		it('is required for output if default is set', () => {
@@ -432,7 +432,7 @@ describe('Field schema generation', () => {
 				default: '[1,2,3]',
 			})
 
-			expect(getZodTypeFromQLType(result, false)).toBe('z.array(z.any())')
+			expect(getZodTypeFromQLType(result, false)).toBe('z.array(z.unknown())')
 		})
 
 		it('optional number array', () => {
