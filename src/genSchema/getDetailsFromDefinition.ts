@@ -63,7 +63,11 @@ const getArrayType = (tokens: TokenizedDefinition, subSchema?: string): string =
 const makeOptional = (schema: string, tokens: TokenizedDefinition, isInputSchema: boolean) => {
 	const typeIsOptional = tokens.type?.toLowerCase().startsWith('option<') ?? false
 
-	if ((!isInputSchema && typeIsOptional && !tokens.default) || (isInputSchema && typeIsOptional && tokens.default)) {
+	if (
+		(!isInputSchema && typeIsOptional && !tokens.default) ||
+		(isInputSchema && tokens.default) ||
+		(typeIsOptional && isInputSchema)
+	) {
 		return `${schema}.optional()`
 	}
 
