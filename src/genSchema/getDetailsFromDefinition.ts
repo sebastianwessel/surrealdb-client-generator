@@ -2,8 +2,8 @@ import { type TokenizedDefinition, tokenize } from './tokenize.js'
 
 const _optionalTypeRegex = /option<([^>]*)>/im
 const stringAssertionRegex = /\sstring::is::([^)]*)\(/im
-const _allInsideAssertionRegex = /ASSERT (?:.*)ALLINSIDE (\[.*\])/im
-const insideAssertionRegex = /ASSERT (?:.*)INSIDE (\[.*\])/im
+const allInsideAssertionRegex = /ALLINSIDE (\[.*\])/im
+const insideAssertionRegex = /INSIDE (\[.*\])/im
 
 const typeRegex = /(?:option<)?(\w+)(?:<)?(\w+)?/i
 
@@ -17,9 +17,8 @@ const getStringType = (tokens: TokenizedDefinition): string => {
 
 	let match = tokens.assert.match(insideAssertionRegex)
 
-	if (match) {
-		// TODO: convert to enum
-		return 'z.string()'
+	if (match?.[1]) {
+		return `z.enum(${match[1]})`
 	}
 
 	match = tokens.assert.match(stringAssertionRegex)
@@ -43,8 +42,13 @@ const getStringType = (tokens: TokenizedDefinition): string => {
 	return result
 }
 
-const getArrayType = (tokens: TokenizedDefinition, subSchema?: string): string => {
+const getArrayType = (tokens: TokenizedDefinition): string => {
 	const match = tokens.type?.match(typeRegex)
+
+	const enumMatch = tokens.assert?.match(allInsideAssertionRegex)
+	if (enumMatch?.[1]) {
+		return `z.array(z.enum(${enumMatch[1]}))`
+	}
 
 	if (match && match.length > 2) {
 		const t = getZodTypeFromQLType(
@@ -57,7 +61,7 @@ const getArrayType = (tokens: TokenizedDefinition, subSchema?: string): string =
 		return `z.array(${t})`
 	}
 
-	return `z.array(${subSchema ?? 'z.unknown()'})`
+	return 'z.array(z.unknown())'
 }
 
 const makeOptional = (schema: string, tokens: TokenizedDefinition, isInputSchema: boolean) => {
@@ -102,14 +106,14 @@ export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema:
 			case 'object':
 				return makeFlexible(makeOptional(subSchema ?? 'z.object({})', tokens, isInputSchema), !!tokens.flexible)
 			case 'record':
-				return 'z.any()'
+				return 'z.unknown()'
 			case 'geometry':
-				return 'z.any()'
+				return 'z.unknown()'
 			default:
-				return 'z.any()'
+				return 'z.unknown()'
 		}
 	}
-	return 'z.any()'
+	return 'z.unknown()'
 }
 
 export const shouldFieldBeSkipped = (tokens: TokenizedDefinition, isInputSchema: boolean): boolean => {

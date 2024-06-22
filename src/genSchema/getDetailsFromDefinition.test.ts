@@ -66,6 +66,33 @@ describe('getDetailsFromDefinition', () => {
 
 			expect(result.zodString).toBe('z.array(z.string())')
 		})
+
+		it('generates a enum schema for string', () => {
+			const result = getDetailsFromDefinition(
+				"DEFINE FIELD permissions ON acl TYPE string ASSERT INSIDE ['create', 'read', 'write', 'delete'] PERMISSIONS FULL;",
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe("z.enum(['create', 'read', 'write', 'delete'])")
+		})
+
+		it('generates a enum schema for array<string>', () => {
+			const result = getDetailsFromDefinition(
+				"DEFINE FIELD permissions ON acl TYPE array<string> ASSERT ALLINSIDE ['create', 'read', 'write', 'delete'] PERMISSIONS FULL;",
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe("z.array(z.enum(['create', 'read', 'write', 'delete']))")
+		})
+
+		it('generates a enum schema for array', () => {
+			const result = getDetailsFromDefinition(
+				"DEFINE FIELD permissions ON acl TYPE array ASSERT ALLINSIDE ['create', 'read', 'write', 'delete'] PERMISSIONS FULL;",
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe("z.array(z.enum(['create', 'read', 'write', 'delete']))")
+		})
 	})
 
 	describe('output schema', () => {
