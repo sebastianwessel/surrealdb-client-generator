@@ -80,6 +80,7 @@ Options:
   -d, --db              the database (default: test)
   -o, --outputFolder    output folder (default: client_generated)
   -g, --generateClient  generate client (default: true)
+  --no-generateClient   no client generation
   -l, --lib             library to be used in client (default: surrealdb.js)
   -h, --help            display help for command
 ```

@@ -26,7 +26,8 @@ const main = async () => {
 		.option('-n, --ns [ns]', 'the namespace', 'test')
 		.option('-d, --db [db]', 'the database', 'test')
 		.option('-o, --outputFolder [outputFolder]', 'output folder', 'client_generated')
-		.option('-g, --generateClient [generateClient]', 'generate client', true)
+		.option('-g, --generateClient', 'generate client', true)
+		.option('--no-generateClient', 'no client generation')
 
 	program.parse()
 
