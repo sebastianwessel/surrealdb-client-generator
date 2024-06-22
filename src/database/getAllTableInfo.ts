@@ -1,6 +1,6 @@
 import { getDb } from './db.js'
 
-export const getAllTableNames = async () => {
+export const getAllTableInfo = async () => {
 	const db = getDb()
 
 	type InfoDB = {
@@ -23,7 +23,5 @@ export const getAllTableNames = async () => {
 		process.exit(1)
 	}
 
-	const res: { tables: Record<string, unknown> } = result[0]
-
-	return Object.keys(res.tables)
+	return result[0].tables
 }

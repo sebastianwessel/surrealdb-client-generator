@@ -4,35 +4,50 @@ import { resolve } from 'node:path'
 import { mkdirp } from 'mkdirp'
 import { rimraf } from 'rimraf'
 
-import { getTableFields } from '../database/getTableFields.js'
+import { getTableInfo } from '../database/getTableInfo.js'
 import { toCamelCase } from '../helper/toCamelCase.js'
 import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
-import { getDetailsFromDefinition } from './getDetailsFromDefinition.js'
 import { mergeNested } from './mergeNested.js'
 
-export const generateTableSchema = async (outFolder: string, tableNames: string[]) => {
+export const generateSchemaForTable = async (name: string, tableInfo: string) => {
+	const tableDefinition = tableInfo
+	const isSchemaFull = !!tableDefinition?.toUpperCase().includes('SCHEMAFULL')
+
+	const { fields } = await getTableInfo(name)
+
+	let inputFields = mergeNested(fields, true)
+	let outputFields = mergeNested(fields, false)
+
+	if (!isSchemaFull) {
+		inputFields += '.passthrough()'
+		outputFields += '.passthrough()'
+	}
+
+	return {
+		inputFields,
+		outputFields,
+	}
+}
+
+export const generateTableSchema = async (outFolder: string, tableInfo: Record<string, string>) => {
 	await mkdirp(outFolder)
 
 	const genSchemaFolder = resolve(outFolder, '_generated')
 
 	console.log('Generating schema in', genSchemaFolder)
 
-	for (const name of tableNames) {
-		const tableName = toCamelCase(name)
+	for (const name in tableInfo) {
+		// biome-ignore lint/style/noNonNullAssertion: During iteration over object, we know the key-value exist
+		const { inputFields, outputFields } = await generateSchemaForTable(name, tableInfo[name]!)
 
+		const tableName = toCamelCase(name)
 		const tableSchemaFolder = resolve(genSchemaFolder, tableName)
 		console.log(`👉 [${tableName}]: ${tableSchemaFolder}`)
 		await rimraf(tableSchemaFolder)
 		await mkdirp(tableSchemaFolder)
 
-		const fields = await getTableFields(name)
-
 		const genSchemaFileName = resolve(tableSchemaFolder, `${toCamelCase(tableName)}SchemaGen.ts`)
 		const genSchemaFile = createWriteStream(genSchemaFileName)
-
-		const inputFields = mergeNested(fields, true)
-
-		const outputFields = mergeNested(fields, false)
 
 		genSchemaFile.write(
 			`// ====================

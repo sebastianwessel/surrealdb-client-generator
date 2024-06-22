@@ -6,7 +6,7 @@ import { program } from 'commander'
 
 import { configFileSchema } from './config/configFileSchema.js'
 import { closeDb, connectDb, insertDefinitions } from './database/db.js'
-import { getAllTableNames } from './database/getAllTableNames.js'
+import { getAllTableInfo } from './database/getAllTableInfo.js'
 import { generateClientJs } from './genClient/generateClientJs.js'
 import { generateTableSchema } from './genSchema/generateTableSchema.js'
 import { printSorry } from './helper/printSorry.js'
@@ -94,12 +94,12 @@ const main = async () => {
 	}
 
 	try {
-		const tableNames = await getAllTableNames()
+		const tableInfo = await getAllTableInfo()
 
-		await generateTableSchema(resolve(__dirname, config.outputFolder), tableNames)
+		await generateTableSchema(resolve(__dirname, config.outputFolder), tableInfo)
 
 		if (config.generateClient) {
-			await generateClientJs(resolve(__dirname, config.outputFolder), tableNames, 'surrealdb.js')
+			await generateClientJs(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb.js')
 		}
 	} catch (error) {
 		printSorry(error)

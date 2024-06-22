@@ -20,6 +20,8 @@ export const connectDb = async (config: Config) => {
 		database: config.db,
 	})
 	await db.signin({
+		namespace: config.ns,
+		database: config.db,
 		username: config.username,
 		password: config.password,
 	})
@@ -27,7 +29,7 @@ export const connectDb = async (config: Config) => {
 
 export const insertDefinitions = async (content: string) => {
 	const db = getDb()
-	const result = await db.query(content, {})
+	const _result = await db.query(content, {})
 	console.log('definitions written to database')
 }
 

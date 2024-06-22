@@ -8,10 +8,14 @@ type InfoTable = {
 	tables: Record<string, unknown>
 }[]
 
-export const getTableFields = async (tableName: string) => {
+export const getTableInfo = async (tableName: string) => {
 	const db = getDb()
 
 	const result = await db.query<InfoTable>(`INFO FOR TABLE ${tableName};`, {})
 
-	return result[0]?.fields ?? {}
+	console.log(result[0])
+
+	return {
+		fields: result[0]?.fields ?? {},
+	}
 }
