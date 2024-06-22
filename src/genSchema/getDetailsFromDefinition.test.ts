@@ -35,6 +35,19 @@ describe('getDetailsFromDefinition', () => {
 
 			expect(result.zodString).toBe('z.string()')
 		})
+
+		it('mark fields with value <future> as skipped', () => {
+			const result = getDetailsFromDefinition(
+				`DEFINE FIELD price.amount ON TABLE product TYPE number;
+  VALUE <future> {
+    LET $lowest_vendor = (SELECT vendors[WHERE price.amount = math::min(vendors.*.price.amount)][0] FROM this);
+    $lowest_vendor.price.amount;
+  };`,
+				isInputSchema,
+			)
+
+			expect(result.skip).toBeTruthy()
+		})
 	})
 
 	describe('output schema', () => {
@@ -70,6 +83,20 @@ describe('getDetailsFromDefinition', () => {
 			const result = getDetailsFromDefinition('DEFINE FIELD description ON TABLE product TYPE string;', isInputSchema)
 
 			expect(result.zodString).toBe('z.string()')
+		})
+
+		it('does not mark fields with value <future> as skipped', () => {
+			const result = getDetailsFromDefinition(
+				`DEFINE FIELD price.amount ON TABLE product TYPE number;
+  VALUE <future> {
+    LET $lowest_vendor = (SELECT vendors[WHERE price.amount = math::min(vendors.*.price.amount)][0] FROM this);
+    $lowest_vendor.price.amount;
+  };`,
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe('z.number()')
+			expect(result.skip).toBeFalsy()
 		})
 	})
 })
