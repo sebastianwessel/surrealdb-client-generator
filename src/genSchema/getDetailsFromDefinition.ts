@@ -74,6 +74,8 @@ const makeOptional = (schema: string, tokens: TokenizedDefinition, isInputSchema
 	return schema
 }
 
+const makeFlexible = (zodString: string, isFlexible: boolean) => (isFlexible ? `${zodString}.passthrough()` : zodString)
+
 export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema: boolean, subSchema?: string) => {
 	const match = tokens.type?.match(typeRegex)
 
@@ -98,7 +100,7 @@ export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema:
 			case 'bool':
 				return makeOptional('z.boolean()', tokens, isInputSchema)
 			case 'object':
-				return makeOptional(subSchema ?? 'z.object({})', tokens, isInputSchema)
+				return makeFlexible(makeOptional(subSchema ?? 'z.object({})', tokens, isInputSchema), !!tokens.flexible)
 			case 'record':
 				return 'z.any()'
 			case 'geometry':
