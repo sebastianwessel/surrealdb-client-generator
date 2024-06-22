@@ -3,8 +3,6 @@ import { type FieldDetail, getDetailsFromDefinition } from './getDetailsFromDefi
 
 export const mergeNested = (fields: Record<string, string>, isInputSchema: boolean) => {
 	const inputFields = Object.entries(fields)
-		// TODO: fix filter:
-		.filter(([fname, _definition]) => !fname.includes('['))
 		.map(([_fname, definition]) => {
 			return getDetailsFromDefinition(definition, isInputSchema)
 		})

@@ -54,6 +54,18 @@ describe('getDetailsFromDefinition', () => {
 
 			expect(result.zodString).toBe('z.object({}).passthrough()')
 		})
+
+		it('returns a array schema with item type any', () => {
+			const result = getDetailsFromDefinition('DEFINE FIELD list ON TABLE product TYPE array;', isInputSchema)
+
+			expect(result.zodString).toBe('z.array(z.any())')
+		})
+
+		it('returns a array schema with item type array<string>', () => {
+			const result = getDetailsFromDefinition('DEFINE FIELD list ON TABLE product TYPE array<string>;', isInputSchema)
+
+			expect(result.zodString).toBe('z.array(z.string())')
+		})
 	})
 
 	describe('output schema', () => {
