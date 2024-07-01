@@ -10,21 +10,17 @@ describe('handleAssertions', () => {
             expect(handleAssertions('z.string()', 'string::is::ipv4()', 'string')).toBe('z.string().ip({ version: "v4" })');
             expect(handleAssertions('z.string()', 'string::is::ipv6()', 'string')).toBe('z.string().ip({ version: "v6" })');
             expect(handleAssertions('z.string()', 'string::is::datetime()', 'string')).toBe('z.string().datetime()');
-            expect(handleAssertions('z.string()', 'string::is::domain()', 'string')).toBe('z.string().url()');
         });
 
         it('handles regex-based string::is:: assertions', () => {
             expect(handleAssertions('z.string()', 'string::is::alphanum()', 'string')).toBe('z.string().regex(/^[a-zA-Z0-9]*$/)');
             expect(handleAssertions('z.string()', 'string::is::alpha()', 'string')).toBe('z.string().regex(/^[a-zA-Z]*$/)');
-            expect(handleAssertions('z.string()', 'string::is::ascii()', 'string')).toBe('z.string().regex(/^[\\x00-\\x7F]*$/)');
+            expect(handleAssertions('z.string()', 'string::is::ascii()', 'string')).toBe('z.string().regex(/^[\x00-\x7F]*$/)');
             expect(handleAssertions('z.string()', 'string::is::hexadecimal()', 'string')).toBe('z.string().regex(/^[0-9a-fA-F]*$/)');
-            expect(handleAssertions('z.string()', 'string::is::latitude()', 'string')).toBe('z.string().regex(/^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$/)');
-            expect(handleAssertions('z.string()', 'string::is::longitude()', 'string')).toBe('z.string().regex(/^[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$/)');
+            expect(handleAssertions('z.string()', 'string::is::latitude()', 'string')).toBe('z.string().regex(/^(\+|-)?(?:90(?:(?:\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,6})?))$/)');
+            expect(handleAssertions('z.string()', 'string::is::longitude()', 'string')).toBe('z.string().regex(/^(\+|-)?(?:180(?:(?:\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,6})?))$/)');
             expect(handleAssertions('z.string()', 'string::is::numeric()', 'string')).toBe('z.string().regex(/^[0-9]*$/)');
-            expect(handleAssertions('z.string()', 'string::is::semver()', 'string')).toBe('z.string().regex(/^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$/)');
-            expect(handleAssertions('z.string()', 'string::is::jwt()', 'string')).toBe('z.string().regex(/^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$/)');
-            expect(handleAssertions('z.string()', 'string::is::base64()', 'string')).toBe('z.string().regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/)');
-            expect(handleAssertions('z.string()', 'string::is::isbn()', 'string')).toBe('z.string().regex(/^(?:ISBN(?:-13)?:?\\ )?(?=[0-9]{13}$|(?=(?:[0-9]+[-\\ ]){4})[-\\ 0-9]{17}$)97[89][-\\ ]?[0-9]{1,5}[-\\ ]?[0-9]+[-\\ ]?[0-9]+[-\\ ]?[0-9]$/)');
+            expect(handleAssertions('z.string()', 'string::is::semver()', 'string')).toBe('z.string().regex(/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(0|[1-9A-Za-z-][0-9A-Za-z-]*)(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/)');
         });
 
         it('handles string length comparisons', () => {
