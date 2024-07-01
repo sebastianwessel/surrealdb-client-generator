@@ -1,64 +1,34 @@
 import { type TokenizedDefinition, tokenize } from './tokenize.js'
-
-const _optionalTypeRegex = /option<([^>]*)>/im
-const stringAssertionRegex = /\sstring::is::([^)]*)\(/im
-const allInsideAssertionRegex = /ALLINSIDE (\[.*\])/im
-const insideAssertionRegex = /INSIDE (\[.*\])/im
+import { handleAssertions } from './handleAssertions.js'
 
 const typeRegex = /(?:option<)?(\w+)(?:<)?(\w+)?/i
 
 export type FieldDetail = TokenizedDefinition & { zodString: string; skip: boolean }
 
 const getStringType = (tokens: TokenizedDefinition): string => {
-	const result = 'z.string()'
-	if (!tokens.assert) {
-		return result
+	let result = 'z.string()';
+	if (tokens.assert) {
+		result = handleAssertions(result, tokens.assert, 'string');
 	}
-
-	let match = tokens.assert.match(insideAssertionRegex)
-
-	if (match?.[1]) {
-		return `z.enum(${match[1]})`
-	}
-
-	match = tokens.assert.match(stringAssertionRegex)
-	if (match) {
-		switch (match[1]?.toLowerCase()) {
-			case 'email':
-				return `${result}.email()`
-			case 'uuid':
-				return `${result}.uuid()`
-			case 'url':
-				return `${result}.url()`
-			case 'datetime':
-				return `${result}.datetime()`
-			case 'startswith':
-				return `${result}.startsWith()`
-			case 'endswith':
-				return `${result}.endsWith()`
-		}
-	}
-
-	return result
+	return result;
 }
 
 const getArrayType = (tokens: TokenizedDefinition): string => {
 	const match = tokens.type?.match(typeRegex)
 
-	const enumMatch = tokens.assert?.match(allInsideAssertionRegex)
-	if (enumMatch?.[1]) {
-		return `z.array(z.enum(${enumMatch[1]}))`
-	}
-
 	if (match && match.length > 2) {
-		const t = getZodTypeFromQLType(
+		const elementType = getZodTypeFromQLType(
 			{
 				...tokens,
 				type: match[2],
 			},
 			false,
 		)
-		return `z.array(${t})`
+		let result = `z.array(${elementType})`;
+		if (tokens.assert) {
+			result = handleAssertions(result, tokens.assert, 'array');
+		}
+		return result;
 	}
 
 	return 'z.array(z.unknown())'
@@ -84,34 +54,48 @@ export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema:
 	const match = tokens.type?.match(typeRegex)
 
 	if (match) {
+		let schema: string;
 		switch (match[1]?.toLowerCase()) {
 			case 'string':
-				return makeOptional(getStringType(tokens), tokens, isInputSchema)
+				schema = getStringType(tokens);
+				break;
 			case 'datetime':
-				return makeOptional('z.string().datetime()', tokens, isInputSchema)
+				schema = 'z.string().datetime()';
+				break;
 			case 'array':
-				return makeOptional(getArrayType(tokens), tokens, isInputSchema)
+				schema = getArrayType(tokens);
+				break;
 			case 'set':
-				return makeOptional('z.array(z.unknown())', tokens, isInputSchema)
+				schema = 'z.array(z.unknown())';
+				break;
 			case 'number':
-				return makeOptional('z.number()', tokens, isInputSchema)
 			case 'float':
-				return makeOptional('z.number()', tokens, isInputSchema)
 			case 'int':
-				return makeOptional('z.number()', tokens, isInputSchema)
 			case 'decimal':
-				return makeOptional('z.number()', tokens, isInputSchema)
+				schema = 'z.number()';
+				if (tokens.assert) {
+					schema = handleAssertions(schema, tokens.assert, 'number');
+				}
+				break;
 			case 'bool':
-				return makeOptional('z.boolean()', tokens, isInputSchema)
+				schema = 'z.boolean()';
+				if (tokens.assert) {
+					schema = handleAssertions(schema, tokens.assert, 'boolean');
+				}
+				break;
 			case 'object':
-				return makeFlexible(makeOptional(subSchema ?? 'z.object({})', tokens, isInputSchema), !!tokens.flexible)
+				schema = subSchema ?? 'z.object({})';
+				break;
 			case 'record':
-				return 'z.unknown()'
 			case 'geometry':
-				return 'z.unknown()'
 			default:
-				return 'z.unknown()'
+				schema = 'z.unknown()';
 		}
+		schema = makeOptional(schema, tokens, isInputSchema);
+		if (match[1]?.toLowerCase() === 'object') {
+			schema = makeFlexible(schema, !!tokens.flexible);
+		}
+		return schema;
 	}
 	return 'z.unknown()'
 }

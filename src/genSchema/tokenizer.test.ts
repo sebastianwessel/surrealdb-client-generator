@@ -138,7 +138,7 @@ describe('Field schema generation', () => {
 				assert: 'string::is::email($value)',
 			})
 
-			expect(getZodTypeFromQLType(result, false)).toBe('z.string()')
+			expect(getZodTypeFromQLType(result, false)).toBe('z.string().email()')
 		})
 
 		it('url', () => {
@@ -152,7 +152,7 @@ describe('Field schema generation', () => {
 				assert: 'string::is::url($value)',
 			})
 
-			expect(getZodTypeFromQLType(result, false)).toBe('z.string()')
+			expect(getZodTypeFromQLType(result, false)).toBe('z.string().url()')
 		})
 
 		it('uuid', () => {
@@ -166,7 +166,7 @@ describe('Field schema generation', () => {
 				assert: 'string::is::uuid($value)',
 			})
 
-			expect(getZodTypeFromQLType(result, false)).toBe('z.string()')
+			expect(getZodTypeFromQLType(result, false)).toBe('z.string().uuid()')
 		})
 
 		it('startsWith', () => {
@@ -208,7 +208,7 @@ describe('Field schema generation', () => {
 				assert: 'string::is::datetime($value)',
 			})
 
-			expect(getZodTypeFromQLType(result, false)).toBe('z.string()')
+			expect(getZodTypeFromQLType(result, false)).toBe('z.string().datetime()')
 		})
 	})
 

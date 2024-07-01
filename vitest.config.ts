@@ -5,5 +5,6 @@ export default defineConfig({
 		include: ['**/*.test.ts'],
 		globals: true,
 		disableConsoleIntercept: true,
+		setupFiles: ['./customMatchers.ts'],
 	},
 })
