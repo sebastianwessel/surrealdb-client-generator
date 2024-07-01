@@ -117,15 +117,6 @@ const handleNumberAssertions = (schema: string, condition: string): string => {
     return schema;
 };
 
-const handleBooleanAssertions = (schema: string, condition: string): string => {
-    const comparisonResult = parseComparison(condition);
-    if (comparisonResult) {
-        const [_, value] = comparisonResult;
-        return `z.literal(${value.toLowerCase() === 'true'})`;
-    }
-    return schema;
-};
-
 const handleDateAssertions = (schema: string): string => {
     return schema;
 };
@@ -171,7 +162,6 @@ export const handleAssertions = (schema: string, assertion: string, schemaType: 
         switch (schemaType) {
             case 'string': return handleStringAssertions(acc, condition);
             case 'number': return handleNumberAssertions(acc, condition);
-            case 'boolean': return handleBooleanAssertions(acc, condition);
             case 'date': return handleDateAssertions(acc);
             case 'array': return handleArrayAssertions(acc, condition);
             default: return acc;

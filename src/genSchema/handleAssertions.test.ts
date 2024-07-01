@@ -79,13 +79,6 @@ describe('handleAssertions', () => {
 
         });
 
-        describe('Boolean assertions', () => {
-            it('handles equality assertions', () => {
-                expect(handleAssertions('z.boolean()', '= true', 'boolean')).toBe('z.literal(true)');
-                expect(handleAssertions('z.boolean()', '= false', 'boolean')).toBe('z.literal(false)');
-            });
-        });
-
         describe('Date assertions', () => {
             it('handles empty assertion', () => {
                 expect(handleAssertions('z.date()', '', 'date')).toEqualIgnoringWhitespace("z.date()");
