@@ -55,10 +55,10 @@ describe('getDetailsFromDefinition', () => {
 			expect(result.zodString).toBe('z.object({}).passthrough()')
 		})
 
-		it('returns a array schema with item type any', () => {
+		it('returns a array schema with item type unknown', () => {
 			const result = getDetailsFromDefinition('DEFINE FIELD list ON TABLE product TYPE array;', isInputSchema)
 
-			expect(result.zodString).toBe('z.array(z.any())')
+			expect(result.zodString).toBe('z.array(z.unknown())')
 		})
 
 		it('returns a array schema with item type array<string>', () => {
@@ -81,8 +81,11 @@ describe('getDetailsFromDefinition', () => {
 				"DEFINE FIELD permissions ON acl TYPE array<string> ASSERT ALLINSIDE ['create', 'read', 'write', 'delete'] PERMISSIONS FULL;",
 				isInputSchema,
 			)
-
-			expect(result.zodString).toBe("z.array(z.enum(['create', 'read', 'write', 'delete']))")
+			const expected = `z.array(z.enum(['create', 'read', 'write', 'delete'])).refine(
+					(arr) => arr.every((item) => ['create', 'read', 'write', 'delete'].includes(item)),
+					{ message: "Array items must be one of ['create', 'read', 'write', 'delete']" }
+			)`
+			expect(result.zodString).toEqualIgnoringWhitespace(expected)
 		})
 
 		it('generates a enum schema for array', () => {
@@ -90,8 +93,11 @@ describe('getDetailsFromDefinition', () => {
 				"DEFINE FIELD permissions ON acl TYPE array ASSERT ALLINSIDE ['create', 'read', 'write', 'delete'] PERMISSIONS FULL;",
 				isInputSchema,
 			)
-
-			expect(result.zodString).toBe("z.array(z.enum(['create', 'read', 'write', 'delete']))")
+			const expected = `z.array(z.enum(['create', 'read', 'write', 'delete'])).refine(
+					(arr) => arr.every((item) => ['create', 'read', 'write', 'delete'].includes(item)),
+					{ message: "Array items must be one of ['create', 'read', 'write', 'delete']" }
+			)`
+			expect(result.zodString).toEqualIgnoringWhitespace(expected)
 		})
 	})
 
