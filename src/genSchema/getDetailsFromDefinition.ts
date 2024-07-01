@@ -2,6 +2,7 @@ import {tokenize, type TokenizedDefinition} from './tokenize.js'
 import {handleAssertions} from './handleAssertions.js'
 
 const typeRegex = /(?:option<)?(\w+)<?(\w+)?/i
+const recordRegex = /record<(\w+)>/i
 
 export type FieldDetail = TokenizedDefinition & { zodString: string; skip: boolean }
 
@@ -56,6 +57,11 @@ const getSchemaForType = (type:string, tokens: TokenizedDefinition, subSchema?: 
 		case 'object':
 			return subSchema ?? 'z.object({})';
 		case 'record':
+			const type = tokens.type?.match(recordRegex)?.[1]
+			if(type){
+				return `z.string().startsWith('${type}:')`
+			}
+			return 'z.string()';
 		case 'geometry':
 		default:
 			return 'z.unknown()';
