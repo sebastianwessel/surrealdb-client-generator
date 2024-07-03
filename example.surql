@@ -118,3 +118,18 @@ DEFINE FIELD outputSchema ON subscription TYPE option<object>;
 DEFINE FIELD parameterSchema ON subscription TYPE option<object>;
 DEFINE FIELD restApi ON subscription TYPE option<object>;
 DEFINE FIELD updatedAt ON subscription TYPE datetime DEFAULT time::now() VALUE $value OR time::now();
+
+
+DEFINE TABLE testcollection SCHEMAFULL;
+
+-- Give the user table an email field. Store it in a string
+DEFINE FIELD email ON TABLE testcollection TYPE string
+  -- Check if the value is a properly formatted email address
+  ASSERT string::is::email($value);
+
+
+DEFINE TABLE book SCHEMAFULL;
+
+DEFINE FIELD vendors ON TABLE book TYPE array<object> DEFAULT [];
+DEFINE FIELD vendors[*].name ON TABLE book TYPE string;
+DEFINE FIELD vendors[*].price ON TABLE book TYPE number;
