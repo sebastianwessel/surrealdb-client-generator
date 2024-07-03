@@ -8,7 +8,7 @@
 		"rules": {
 			"recommended": true
 		},
-		"ignore": ["dist/**", "node_modules/**", ".tshy/**", "./out/**", "./client_generated/**"]
+		"ignore": ["dist/**", "node_modules/**", ".tshy/**", ".tshy-build/**", "./out/**", "./client_generated/**"]
 	},
 	"formatter": {
 		"ignore": ["dist/**", "node_modules/**", ".tshy/**", "./out/**"],
