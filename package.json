@@ -34,7 +34,8 @@
 		"prepare": "tshy"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.8.2",
+		"@biomejs/biome": "^1.8.3",
+		"@types/node": "^20.14.9",
 		"tshy": "^1.15.1",
 		"tsx": "^4.15.7",
 		"typescript": "^5.5.2",
@@ -70,5 +71,6 @@
 	},
 	"type": "module",
 	"main": "./dist/commonjs/index.js",
-	"types": "./dist/commonjs/index.d.ts"
+	"types": "./dist/commonjs/index.d.ts",
+	"module": "./dist/esm/index.js"
 }

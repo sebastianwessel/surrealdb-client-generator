@@ -89,6 +89,7 @@ web_modules/
 
 client_generated/
 .tshy
+.tshy-build
 .tshy-build-tmp
 dist
 playground.ts

@@ -1,72 +1,29 @@
+import { type SchemaType, handleAssertions } from './handleAssertions.js'
 import { type TokenizedDefinition, tokenize } from './tokenize.js'
 
-const _optionalTypeRegex = /option<([^>]*)>/im
-const stringAssertionRegex = /\sstring::is::([^)]*)\(/im
-const allInsideAssertionRegex = /ALLINSIDE (\[.*\])/im
-const insideAssertionRegex = /INSIDE (\[.*\])/im
-
-const typeRegex = /(?:option<)?(\w+)(?:<)?(\w+)?/i
+const typeRegex = /(?:option<)?(\w+)<?(\w+)?/i
+const recordRegex = /record<(\w+)>/i
 
 export type FieldDetail = TokenizedDefinition & { zodString: string; skip: boolean }
-
-const getStringType = (tokens: TokenizedDefinition): string => {
-	const result = 'z.string()'
-	if (!tokens.assert) {
-		return result
-	}
-
-	let match = tokens.assert.match(insideAssertionRegex)
-
-	if (match?.[1]) {
-		return `z.enum(${match[1]})`
-	}
-
-	match = tokens.assert.match(stringAssertionRegex)
-	if (match) {
-		switch (match[1]?.toLowerCase()) {
-			case 'email':
-				return `${result}.email()`
-			case 'uuid':
-				return `${result}.uuid()`
-			case 'url':
-				return `${result}.url()`
-			case 'datetime':
-				return `${result}.datetime()`
-			case 'startswith':
-				return `${result}.startsWith()`
-			case 'endswith':
-				return `${result}.endsWith()`
-		}
-	}
-
-	return result
-}
 
 const getArrayType = (tokens: TokenizedDefinition): string => {
 	const match = tokens.type?.match(typeRegex)
 
-	const enumMatch = tokens.assert?.match(allInsideAssertionRegex)
-	if (enumMatch?.[1]) {
-		return `z.array(z.enum(${enumMatch[1]}))`
-	}
-
 	if (match && match.length > 2) {
-		const t = getZodTypeFromQLType(
+		const elementType = getZodTypeFromQLType(
 			{
 				...tokens,
 				type: match[2],
 			},
 			false,
 		)
-		return `z.array(${t})`
+		return `z.array(${elementType})`
 	}
-
 	return 'z.array(z.unknown())'
 }
 
 const makeOptional = (schema: string, tokens: TokenizedDefinition, isInputSchema: boolean) => {
 	const typeIsOptional = tokens.type?.toLowerCase().startsWith('option<') ?? false
-
 	if (
 		(!isInputSchema && typeIsOptional && !tokens.default) ||
 		(isInputSchema && tokens.default) ||
@@ -80,38 +37,52 @@ const makeOptional = (schema: string, tokens: TokenizedDefinition, isInputSchema
 
 const makeFlexible = (zodString: string, isFlexible: boolean) => (isFlexible ? `${zodString}.passthrough()` : zodString)
 
+const getSchemaForType = (type: string, tokens: TokenizedDefinition, subSchema?: string) => {
+	switch (type) {
+		case 'string':
+			return 'z.string()'
+		case 'datetime':
+			return 'z.string().datetime()'
+		case 'set':
+			return 'z.array(z.unknown())'
+		case 'array':
+			return getArrayType(tokens)
+		case 'number':
+		case 'float':
+		case 'int':
+		case 'decimal':
+			return 'z.number()'
+		case 'bool':
+			return 'z.boolean()'
+		case 'object':
+			return subSchema ?? 'z.object({})'
+		case 'record': {
+			const type = tokens.type?.match(recordRegex)?.[1]
+			if (type) {
+				return `z.string().startsWith('${type}:')`
+			}
+			return 'z.string()'
+		}
+		default:
+			return 'z.unknown()'
+	}
+}
+
 export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema: boolean, subSchema?: string) => {
 	const match = tokens.type?.match(typeRegex)
 
-	if (match) {
-		switch (match[1]?.toLowerCase()) {
-			case 'string':
-				return makeOptional(getStringType(tokens), tokens, isInputSchema)
-			case 'datetime':
-				return makeOptional('z.string().datetime()', tokens, isInputSchema)
-			case 'array':
-				return makeOptional(getArrayType(tokens), tokens, isInputSchema)
-			case 'set':
-				return makeOptional('z.array(z.unknown())', tokens, isInputSchema)
-			case 'number':
-				return makeOptional('z.number()', tokens, isInputSchema)
-			case 'float':
-				return makeOptional('z.number()', tokens, isInputSchema)
-			case 'int':
-				return makeOptional('z.number()', tokens, isInputSchema)
-			case 'decimal':
-				return makeOptional('z.number()', tokens, isInputSchema)
-			case 'bool':
-				return makeOptional('z.boolean()', tokens, isInputSchema)
-			case 'object':
-				return makeFlexible(makeOptional(subSchema ?? 'z.object({})', tokens, isInputSchema), !!tokens.flexible)
-			case 'record':
-				return 'z.unknown()'
-			case 'geometry':
-				return 'z.unknown()'
-			default:
-				return 'z.unknown()'
+	if (match?.[1]) {
+		const type = match[1].toLowerCase() as SchemaType
+		let schema = getSchemaForType(type, tokens, subSchema)
+
+		if (tokens.assert) {
+			schema = handleAssertions(schema, tokens.assert, type)
 		}
+		schema = makeOptional(schema, tokens, isInputSchema)
+		if (type === 'object') {
+			schema = makeFlexible(schema, !!tokens.flexible)
+		}
+		return schema
 	}
 	return 'z.unknown()'
 }
