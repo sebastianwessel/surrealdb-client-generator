@@ -14,6 +14,5 @@
 		"strict": true,
 		"target": "es2022",
 		"types": ["vitest/globals"]
-	},
-	"include": ["./src/vitest.d.ts"]
+	}
 }
