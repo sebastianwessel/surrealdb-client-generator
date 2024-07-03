@@ -1,6 +1,6 @@
 {
 	"schemaFile": "example.surql",
-	"surreal": "http://localhost:8000",
+	"surreal": "http://localhost:8000/rpc",
 	"username": "root",
 	"password": "root",
 	"ns": "my_namespace",

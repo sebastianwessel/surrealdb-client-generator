@@ -20,8 +20,6 @@ export const connectDb = async (config: Config) => {
 		database: config.db,
 	})
 	await db.signin({
-		namespace: config.ns,
-		database: config.db,
 		username: config.username,
 		password: config.password,
 	})
