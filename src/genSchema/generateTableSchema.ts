@@ -15,8 +15,8 @@ export const generateSchemaForTable = async (name: string, tableInfo: string) =>
 
 	const { fields } = await getTableInfo(name)
 
-	let inputFields = mergeNested(fields, true)
-	let outputFields = mergeNested(fields, false)
+	let inputFields = mergeNested(fields, true, name)
+	let outputFields = mergeNested(fields, false, name)
 
 	if (!isSchemaFull) {
 		inputFields += '.passthrough()'
@@ -58,10 +58,10 @@ export const generateTableSchema = async (outFolder: string, tableInfo: Record<s
 import { z } from "zod";
 
 // the create schema for table ${name}
-export const ${tableName}InputSchemaGen = ${inputFields};
+export ${inputFields};
 
 // the select schema for table ${name}
-export const ${tableName}OutputSchemaGen = ${outputFields};
+export ${outputFields};
 
 `,
 		)
