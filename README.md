@@ -58,12 +58,6 @@ Configuring options for this tool is flexible and convenient. You have two main 
 And the best part? You can use both methods simultaneously if it suits your needs. In such cases, the tool intelligently merges the parameters, giving priority to the ones provided through the CLI.
 This means you have complete control over your configuration, adapting it to your preferences effortlessly.
 
-Decide for which lib do you want to generate your client.
-Currently available:
-
-- surrealdb.js
-- surrealdb.node
-
 ```bash
 Usage: surql-gen [options]
 
@@ -81,7 +75,6 @@ Options:
   -o, --outputFolder    output folder (default: client_generated)
   -g, --generateClient  generate client (default: true)
   --no-generateClient   no client generation
-  -l, --lib             library to be used in client (default: surrealdb.js)
   -h, --help            display help for command
 ```
 

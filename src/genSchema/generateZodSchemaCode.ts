@@ -7,15 +7,17 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 			const parts = field.name.split('.').map(part => part.replace('[*]', ''))
 			let current = fieldMap
 
+			const fieldDefault = undefined // field.default
+
 			let i = 0
 			for (const part of parts) {
 				if (i === parts.length - 1) {
 					// Leaf node
 					if (field.type?.startsWith('array')) {
-						current[part] = `z.array(${field.zodString.replace('{}', '')}).default(${field.default ?? '[]'})`
+						current[part] = `z.array(${field.zodString.replace('{}', '')}).default(${fieldDefault ?? '[]'})`
 					} else {
-						const fieldDefault = field.default ? `.default(${field.default})` : ''
-						current[part] = `${field.zodString}${fieldDefault}`
+						const fd = fieldDefault ? `.default(${fieldDefault})` : ''
+						current[part] = `${field.zodString}${fd}`
 					}
 				} else {
 					// Intermediate node

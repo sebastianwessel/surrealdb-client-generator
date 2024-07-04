@@ -31,12 +31,14 @@
 		"build": "tshy",
 		"lint": "npx @biomejs/biome check --write .",
 		"test": "vitest",
-		"prepare": "tshy"
+		"prepublishOnly": "npm run lint && vitest --no-watch && tshy",
+		"postpublish": "npx jsr publish"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
 		"@types/node": "^20.14.10",
 		"tshy": "^3.0.2",
+		"jsr": "^0.12.4",
 		"tsx": "^4.15.7",
 		"typescript": "^5.5.2",
 		"vitest": "^2.0.1"

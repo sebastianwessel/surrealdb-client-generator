@@ -48,9 +48,6 @@ export const tokenize = (definition: string): TokenizedDefinition => {
 
 	const defaultMatch = definition.match(/DEFAULT (\S+)/im)
 	if (defaultMatch) {
-		// Default makes no sense in base schemas.
-		// Get should only return existing values
-		// Create with default means optional in schema
 		result.default = defaultMatch[1]
 	}
 
