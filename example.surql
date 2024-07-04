@@ -133,3 +133,6 @@ DEFINE TABLE book SCHEMAFULL;
 DEFINE FIELD vendors ON TABLE book TYPE array<object> DEFAULT [];
 DEFINE FIELD vendors[*].name ON TABLE book TYPE string;
 DEFINE FIELD vendors[*].price ON TABLE book TYPE number;
+
+DEFINE FIELD vendors[*].ratings ON TABLE book TYPE array<object> DEFAULT [];
+DEFINE FIELD vendors[*].ratings[*].score ON TABLE book TYPE number DEFAULT 0;
