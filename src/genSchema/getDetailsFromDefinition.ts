@@ -59,7 +59,7 @@ const getSchemaForType = (type: string, tokens: TokenizedDefinition, subSchema?:
 		case 'record': {
 			const type = tokens.type?.match(recordRegex)?.[1]
 			if (type) {
-				return `z.string().startsWith('${type}:')`
+				return `recordId('${type}')`
 			}
 			return 'z.string()'
 		}
