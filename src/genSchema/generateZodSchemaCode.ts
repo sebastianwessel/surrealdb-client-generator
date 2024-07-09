@@ -46,7 +46,7 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 			return entries.join(',\n  ')
 		}
 
-		return `const ${schemaName} = z.object({\n  ${buildObject(fieldMap)}\n})`
+		return `const ${schemaName} = z.object({\n${buildObject(fieldMap)},\n})`
 	}
 
 	const fieldMap: { [key: string]: unknown } = {}
