@@ -1,14 +1,14 @@
-import {createWriteStream, existsSync, writeFileSync} from 'node:fs'
-import {resolve} from 'node:path'
+import { createWriteStream, existsSync, writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
-import {mkdirp} from 'mkdirp'
-import {rimraf} from 'rimraf'
+import { mkdirp } from 'mkdirp'
+import { rimraf } from 'rimraf'
 
-import {getTableInfo} from '../database/getTableInfo.js'
-import {toCamelCase} from '../helper/toCamelCase.js'
-import {toUpperCamelCase} from '../helper/toUpperCamelCase.js'
-import {ensureRecordSchema} from './ensureRecordSchema.js'
-import {mergeNested} from './mergeNested.js'
+import { getTableInfo } from '../database/getTableInfo.js'
+import { toCamelCase } from '../helper/toCamelCase.js'
+import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
+import { ensureRecordSchema } from './ensureRecordSchema.js'
+import { mergeNested } from './mergeNested.js'
 
 export const generateSchemaForTable = async (name: string, tableInfo: string) => {
 	const isSchemaFull = !!tableInfo?.toUpperCase().includes('SCHEMAFULL')
@@ -30,10 +30,12 @@ export const generateSchemaForTable = async (name: string, tableInfo: string) =>
 }
 
 const createIndexFile = (directory: string, files: string[]) => {
-	const indexContent = files.map(file => {
-		const baseName = file.replace(/\.ts$/, '')
-		return `export * from './${baseName}.js';`
-	}).join('\n')
+	const indexContent = files
+		.map(file => {
+			const baseName = file.replace(/\.ts$/, '')
+			return `export * from './${baseName}.js';`
+		})
+		.join('\n')
 
 	writeFileSync(resolve(directory, 'index.ts'), indexContent)
 }
@@ -159,13 +161,13 @@ export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema>
 		.map(name => `export * from './${toCamelCase(name)}/index.js';`)
 		.join('\n')
 	writeFileSync(mainIndexFileName, mainIndexContent)
-	console.log(` ✅ Created/Updated main schema index.ts`)
+	console.log(' ✅ Created/Updated main schema index.ts')
 
 	const genIndexFileName = resolve(genSchemaFolder, 'index.ts')
 	if (!existsSync(genIndexFileName)) {
 		createIndexFile(genSchemaFolder, generatedFiles)
-		console.log(` ✅ Created _generated/index.ts`)
+		console.log(' ✅ Created _generated/index.ts')
 	} else {
-		console.log(` ❎ _generated/index.ts already exists`)
+		console.log(' ❎ _generated/index.ts already exists')
 	}
 }

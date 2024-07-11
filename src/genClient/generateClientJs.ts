@@ -13,10 +13,12 @@ import { getRepositoryContent } from './getRepositoryFileContent.js'
 import { getUpdateEntityFileContent } from './getUpdateEntityFileContent.js'
 
 const createIndexFile = (directory: string, files: string[]) => {
-	const indexContent = files.map(file => {
-		const baseName = file.replace(/\.ts$/, '')
-		return `export * from './${baseName}.js';`
-	}).join('\n')
+	const indexContent = files
+		.map(file => {
+			const baseName = file.replace(/\.ts$/, '')
+			return `export * from './${baseName}.js';`
+		})
+		.join('\n')
 
 	writeFileSync(resolve(directory, 'index.ts'), indexContent)
 }
@@ -68,7 +70,7 @@ export const generateClientJs = async (outputFolder: string, tableNames: string[
 			if (!existsSync(fullFileName)) {
 				const file = createWriteStream(fullFileName)
 				await new Promise<void>((resolve, reject) => {
-					file.write(content(), (err) => {
+					file.write(content(), err => {
 						if (err) {
 							console.error(err)
 							reject(err)
@@ -91,9 +93,7 @@ export const generateClientJs = async (outputFolder: string, tableNames: string[
 		generatedFiles.push(tableName)
 	}
 
-	const mainIndexContent = generatedFiles
-		.map(name => `export * from './${name}/index.js';`)
-		.join('\n')
+	const mainIndexContent = generatedFiles.map(name => `export * from './${name}/index.js';`).join('\n')
 	writeFileSync(resolve(clientFolder, 'index.ts'), mainIndexContent)
-	console.log(` ✅ Created/Updated main client index.ts`)
+	console.log(' ✅ Created/Updated main client index.ts')
 }

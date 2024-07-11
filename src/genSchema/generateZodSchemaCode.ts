@@ -36,33 +36,32 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 
 	const generateCode = (fieldMap: { [key: string]: unknown }, schemaName: string): string => {
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		const buildObject = (obj: { [key: string]: any }, parentKey: string = ''): string => {
+		const buildObject = (obj: { [key: string]: any }, parentKey = ''): string => {
 			const entries = Object.entries(obj).map(([key, value]) => {
 				const fullKey = parentKey ? `${parentKey}.${key}` : key
 				if (typeof value === 'string') {
 					return `${key}: ${value}`
-				} else {
-					const innerObject = buildObject(value, fullKey)
-					let objectSchema = `z.object({\n${innerObject}\n  })`
-
-					const allOptional = Object.values(value).every(v =>
-						typeof v === 'string' && (v.includes('.optional()') || v.endsWith('.passthrough()'))
-					)
-
-					const fieldSchema = fields.find(f => f.name === fullKey)
-					const isOptionalFromSchema = fieldSchema && fieldSchema.zodString.includes('.optional()')
-
-					// Check if this object should be an array
-					if (fields.some(f => f.name.includes(`${fullKey}[*]`))) {
-						objectSchema += '.array()'
-					}
-
-					if (allOptional || isOptionalFromSchema) {
-						objectSchema += '.optional()'
-					}
-
-					return `${key}: ${objectSchema}`
 				}
+				const innerObject = buildObject(value, fullKey)
+				let objectSchema = `z.object({\n${innerObject}\n  })`
+
+				const allOptional = Object.values(value).every(
+					v => typeof v === 'string' && (v.includes('.optional()') || v.endsWith('.passthrough()')),
+				)
+
+				const fieldSchema = fields.find(f => f.name === fullKey)
+				const isOptionalFromSchema = fieldSchema?.zodString.includes('.optional()')
+
+				// Check if this object should be an array
+				if (fields.some(f => f.name.includes(`${fullKey}[*]`))) {
+					objectSchema += '.array()'
+				}
+
+				if (allOptional || isOptionalFromSchema) {
+					objectSchema += '.optional()'
+				}
+
+				return `${key}: ${objectSchema}`
 			})
 			return entries.join(',\n  ')
 		}
