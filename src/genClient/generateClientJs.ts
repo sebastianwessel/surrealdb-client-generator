@@ -1,4 +1,4 @@
-import { createWriteStream, existsSync } from 'node:fs'
+import { createWriteStream, existsSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 import { mkdirp } from 'mkdirp'
@@ -12,8 +12,20 @@ import { getDeleteEntityFileContent } from './getDeleteEntityFileContent.js'
 import { getRepositoryContent } from './getRepositoryFileContent.js'
 import { getUpdateEntityFileContent } from './getUpdateEntityFileContent.js'
 
+const createIndexFile = (directory: string, files: string[]) => {
+	const indexContent = files.map(file => {
+		const baseName = file.replace(/\.ts$/, '')
+		return `export * from './${baseName}.js';`
+	}).join('\n')
+
+	writeFileSync(resolve(directory, 'index.ts'), indexContent)
+}
+
 export const generateClientJs = async (outputFolder: string, tableNames: string[], lib: string) => {
 	const clientFolder = resolve(outputFolder, 'client')
+	await mkdirp(clientFolder)
+
+	const generatedFiles: string[] = []
 
 	for (const name of tableNames) {
 		const tableName = toCamelCase(name)
@@ -24,115 +36,64 @@ export const generateClientJs = async (outputFolder: string, tableNames: string[
 
 		console.log(`👉 [${tableName}]: ${clientTableFolder}`)
 
-		const repoFileName = resolve(clientTableFolder, `get${tableNameFirstUpper}Repository.ts`)
-		if (!existsSync(repoFileName)) {
-			const file = createWriteStream(repoFileName)
-			await new Promise((resolve, reject) =>
-				file.write(getRepositoryContent(lib, tableNameFirstUpper), err => {
-					if (err) {
-						console.error(err)
-						reject(err)
-					} else {
-						resolve(true)
-					}
-				}),
-			)
-			file.close()
+		const fileOperations = [
+			{
+				fileName: `get${tableNameFirstUpper}Repository.ts`,
+				content: () => getRepositoryContent(lib, tableNameFirstUpper),
+			},
+			{
+				fileName: `create${tableNameFirstUpper}.ts`,
+				content: () => getCreateEntityFileContent(lib, tableName, name),
+			},
+			{
+				fileName: `update${tableNameFirstUpper}.ts`,
+				content: () => getUpdateEntityFileContent(lib, tableName),
+			},
+			{
+				fileName: `delete${tableNameFirstUpper}.ts`,
+				content: () => getDeleteEntityFileContent(lib, tableName),
+			},
+			{
+				fileName: `getAll${tableNameFirstUpper}s.ts`,
+				content: () => getAllEntityFileContent(lib, tableName, name),
+			},
+			{
+				fileName: `get${tableNameFirstUpper}ById.ts`,
+				content: () => getByIdEntityFileContent(lib, tableName),
+			},
+		]
+
+		for (const { fileName, content } of fileOperations) {
+			const fullFileName = resolve(clientTableFolder, fileName)
+			if (!existsSync(fullFileName)) {
+				const file = createWriteStream(fullFileName)
+				await new Promise<void>((resolve, reject) => {
+					file.write(content(), (err) => {
+						if (err) {
+							console.error(err)
+							reject(err)
+						} else {
+							resolve()
+						}
+					})
+				})
+				file.close()
+				console.log(` ✅ [${tableName}]: ${fileName}`)
+			} else {
+				console.log(` ❌ [${tableName}]: ${fileName} already exists`)
+			}
 		}
 
-		const createFileName = resolve(clientTableFolder, `create${tableNameFirstUpper}.ts`)
-		if (!existsSync(createFileName)) {
-			const file = createWriteStream(createFileName)
-			await new Promise((resolve, reject) =>
-				file.write(getCreateEntityFileContent(lib, tableName, name), err => {
-					if (err) {
-						console.error(err)
-						reject(err)
-					} else {
-						resolve(true)
-					}
-				}),
-			)
-			file.close()
-			console.log(` ✅ [${tableName}]: create${tableNameFirstUpper}.ts`)
-		} else {
-			console.log(` ❌ [${tableName}]: create${tableNameFirstUpper}.ts already exists`)
-		}
+		const allTableFiles = fileOperations.map(op => op.fileName)
+		createIndexFile(clientTableFolder, allTableFiles)
+		console.log(` ✅ [${tableName}]: index.ts created/updated`)
 
-		const updateFileName = resolve(clientTableFolder, `update${tableNameFirstUpper}.ts`)
-		if (!existsSync(updateFileName)) {
-			const file = createWriteStream(updateFileName)
-			await new Promise((resolve, reject) =>
-				file.write(getUpdateEntityFileContent(lib, tableName), err => {
-					if (err) {
-						console.error(err)
-						reject(err)
-					} else {
-						resolve(true)
-					}
-				}),
-			)
-			file.close()
-			console.log(` ✅ [${tableName}]: update${tableNameFirstUpper}.ts`)
-		} else {
-			console.log(` ❌ [${tableName}]: update${tableNameFirstUpper}.ts already exists ${updateFileName}`)
-		}
-
-		const deleteFileName = resolve(clientTableFolder, `delete${tableNameFirstUpper}.ts`)
-		if (!existsSync(deleteFileName)) {
-			const file = createWriteStream(deleteFileName)
-			await new Promise((resolve, reject) =>
-				file.write(getDeleteEntityFileContent(lib, tableName), err => {
-					if (err) {
-						console.error(err)
-						reject(err)
-					} else {
-						resolve(true)
-					}
-				}),
-			)
-			file.close()
-			console.log(` ✅ [${tableName}]: delete${tableNameFirstUpper}.ts`)
-		} else {
-			console.log(` ❌ [${tableName}]: delete${tableNameFirstUpper}.ts already exists`)
-		}
-
-		const getAllFileName = resolve(clientTableFolder, `getAll${tableNameFirstUpper}s.ts`)
-		if (!existsSync(getAllFileName)) {
-			const file = createWriteStream(getAllFileName)
-			await new Promise((resolve, reject) =>
-				file.write(getAllEntityFileContent(lib, tableName, name), err => {
-					if (err) {
-						console.error(err)
-						reject(err)
-					} else {
-						resolve(true)
-					}
-				}),
-			)
-			file.close()
-			console.log(` ✅ [${tableName}]: getAll${tableNameFirstUpper}s.ts`)
-		} else {
-			console.log(` ❌ [${tableName}]: getAll${tableNameFirstUpper}s.ts already exists`)
-		}
-
-		const getByIdFileName = resolve(clientTableFolder, `get${tableNameFirstUpper}ById.ts`)
-		if (!existsSync(getByIdFileName)) {
-			const file = createWriteStream(getByIdFileName)
-			await new Promise((resolve, reject) =>
-				file.write(getByIdEntityFileContent(lib, tableName), err => {
-					if (err) {
-						console.error(err)
-						reject(err)
-					} else {
-						resolve(true)
-					}
-				}),
-			)
-			file.close()
-			console.log(` ✅ [${tableName}]: get${tableNameFirstUpper}ById.ts`)
-		} else {
-			console.log(` ❌ [${tableName}]: get${tableNameFirstUpper}ById.ts already exists`)
-		}
+		generatedFiles.push(tableName)
 	}
+
+	const mainIndexContent = generatedFiles
+		.map(name => `export * from './${name}/index.js';`)
+		.join('\n')
+	writeFileSync(resolve(clientFolder, 'index.ts'), mainIndexContent)
+	console.log(` ✅ Created/Updated main client index.ts`)
 }
