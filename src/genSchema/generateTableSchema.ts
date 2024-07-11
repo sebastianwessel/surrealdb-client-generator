@@ -1,18 +1,17 @@
-import { createWriteStream, existsSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import {createWriteStream, existsSync, writeFileSync} from 'node:fs'
+import {resolve} from 'node:path'
 
-import { mkdirp } from 'mkdirp'
-import { rimraf } from 'rimraf'
+import {mkdirp} from 'mkdirp'
+import {rimraf} from 'rimraf'
 
-import { getTableInfo } from '../database/getTableInfo.js'
-import { toCamelCase } from '../helper/toCamelCase.js'
-import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
-import { ensureRecordSchema } from './ensureRecordSchema.js'
-import { mergeNested } from './mergeNested.js'
+import {getTableInfo} from '../database/getTableInfo.js'
+import {toCamelCase} from '../helper/toCamelCase.js'
+import {toUpperCamelCase} from '../helper/toUpperCamelCase.js'
+import {ensureRecordSchema} from './ensureRecordSchema.js'
+import {mergeNested} from './mergeNested.js'
 
 export const generateSchemaForTable = async (name: string, tableInfo: string) => {
-	const tableDefinition = tableInfo
-	const isSchemaFull = !!tableDefinition?.toUpperCase().includes('SCHEMAFULL')
+	const isSchemaFull = !!tableInfo?.toUpperCase().includes('SCHEMAFULL')
 
 	const { fields } = await getTableInfo(name)
 
@@ -154,7 +153,6 @@ export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema>
 		}
 	}
 
-	// Always generate the main schema index file
 	const mainSchemaFolder = resolve(outFolder, 'schema')
 	const mainIndexFileName = resolve(mainSchemaFolder, 'index.ts')
 	const mainIndexContent = Object.keys(tableInfo)

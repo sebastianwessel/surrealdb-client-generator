@@ -36,8 +36,6 @@ export const generateClientJs = async (outputFolder: string, tableNames: string[
 
 		console.log(`👉 [${tableName}]: ${clientTableFolder}`)
 
-		const tableFiles: string[] = []
-
 		const fileOperations = [
 			{
 				fileName: `get${tableNameFirstUpper}Repository.ts`,
@@ -81,23 +79,21 @@ export const generateClientJs = async (outputFolder: string, tableNames: string[
 				})
 				file.close()
 				console.log(` ✅ [${tableName}]: ${fileName}`)
-				tableFiles.push(fileName)
 			} else {
 				console.log(` ❌ [${tableName}]: ${fileName} already exists`)
 			}
 		}
 
-		// Create index file for each table client folder
-		createIndexFile(clientTableFolder, tableFiles)
-		console.log(` ✅ [${tableName}]: index.ts`)
+		const allTableFiles = fileOperations.map(op => op.fileName)
+		createIndexFile(clientTableFolder, allTableFiles)
+		console.log(` ✅ [${tableName}]: index.ts created/updated`)
 
 		generatedFiles.push(tableName)
 	}
 
-	// Create main index file in the client folder
 	const mainIndexContent = generatedFiles
 		.map(name => `export * from './${name}/index.js';`)
 		.join('\n')
 	writeFileSync(resolve(clientFolder, 'index.ts'), mainIndexContent)
-	console.log(` ✅ Created main client index.ts`)
+	console.log(` ✅ Created/Updated main client index.ts`)
 }
