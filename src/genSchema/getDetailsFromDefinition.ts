@@ -78,10 +78,12 @@ export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema:
 		if (tokens.assert) {
 			schema = handleAssertions(schema, tokens.assert, type)
 		}
-		schema = makeOptional(schema, tokens, isInputSchema)
+
 		if (type === 'object') {
 			schema = makeFlexible(schema, !!tokens.flexible)
 		}
+		schema = makeOptional(schema, tokens, isInputSchema)
+
 		return schema
 	}
 	return 'z.unknown()'
