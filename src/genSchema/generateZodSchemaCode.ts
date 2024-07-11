@@ -73,6 +73,5 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 
 	const fieldMap: { [key: string]: unknown } = {}
 	buildSchema(fieldMap, fields)
-	console.log("fieldMap", fieldMap)
 	return generateCode(fieldMap, schemaName)
 }
