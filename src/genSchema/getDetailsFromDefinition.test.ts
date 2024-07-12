@@ -113,10 +113,7 @@ describe('getDetailsFromDefinition', () => {
 		})
 
 		it('returns a record with defined type', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD record ON TABLE product TYPE record<test>;',
-				isInputSchema,
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD record ON TABLE product TYPE record<test>;', isInputSchema)
 
 			expect(result.zodString).toBe(`recordId('test')`)
 		})
@@ -131,12 +128,9 @@ describe('getDetailsFromDefinition', () => {
 		})
 
 		it('returns an array of records without defined types', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD record ON TABLE product TYPE array<record>;',
-				isInputSchema,
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD record ON TABLE product TYPE array<record>;', isInputSchema)
 
-			expect(result.zodString).toBe(`recordId().array()`)
+			expect(result.zodString).toBe('recordId().array()')
 		})
 
 		it('returns an optional array of records with defined type', () => {
@@ -154,7 +148,7 @@ describe('getDetailsFromDefinition', () => {
 				isInputSchema,
 			)
 
-			expect(result.zodString).toBe(`recordId().array().optional()`)
+			expect(result.zodString).toBe('recordId().array().optional()')
 		})
 
 		it('returns required string for optional string with default', () => {

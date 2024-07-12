@@ -9,7 +9,7 @@ export type FieldDetail = TokenizedDefinition & { zodString: string; skip: boole
 const getArrayType = (tokens: TokenizedDefinition, isInputSchema: boolean): string => {
 	const match = tokens.type?.match(typeRegex)
 
-	if (match && match[2]) {
+	if (match?.[2]) {
 		const elementType = match[2].toLowerCase()
 		if (elementType === 'record') {
 			const recordType = match[3]
@@ -20,7 +20,7 @@ const getArrayType = (tokens: TokenizedDefinition, isInputSchema: boolean): stri
 				...tokens,
 				type: match[2],
 			},
-			isInputSchema
+			isInputSchema,
 		)
 		return `z.array(${innerType})`
 	}
