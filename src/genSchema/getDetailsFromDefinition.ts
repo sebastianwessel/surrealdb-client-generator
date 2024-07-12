@@ -1,23 +1,28 @@
 import { type SchemaType, handleAssertions } from './handleAssertions.js'
 import { type TokenizedDefinition, tokenize } from './tokenize.js'
 
-const typeRegex = /(?:option<)?(\w+)<?(\w+)?/i
-const recordRegex = /record<(\w+)>/i
+const typeRegex = /(?:option<)?(\w+)(?:<(\w+)(?:<(\w+)>)?>)?/i
+const recordRegex = /record(?:<(\w+)>)?/i
 
 export type FieldDetail = TokenizedDefinition & { zodString: string; skip: boolean }
 
-const getArrayType = (tokens: TokenizedDefinition): string => {
+const getArrayType = (tokens: TokenizedDefinition, isInputSchema: boolean): string => {
 	const match = tokens.type?.match(typeRegex)
 
-	if (match && match.length > 2) {
-		const elementType = getZodTypeFromQLType(
+	if (match && match[2]) {
+		const elementType = match[2].toLowerCase()
+		if (elementType === 'record') {
+			const recordType = match[3]
+			return recordType ? `recordId('${recordType}').array()` : 'recordId().array()'
+		}
+		const innerType = getZodTypeFromQLType(
 			{
 				...tokens,
 				type: match[2],
 			},
-			false,
+			isInputSchema
 		)
-		return `z.array(${elementType})`
+		return `z.array(${innerType})`
 	}
 	return 'z.array(z.unknown())'
 }
@@ -37,7 +42,7 @@ const makeOptional = (schema: string, tokens: TokenizedDefinition, isInputSchema
 
 const makeFlexible = (zodString: string, isFlexible: boolean) => (isFlexible ? `${zodString}.passthrough()` : zodString)
 
-const getSchemaForType = (type: string, tokens: TokenizedDefinition, subSchema?: string) => {
+const getSchemaForType = (type: string, tokens: TokenizedDefinition, isInputSchema: boolean, subSchema?: string) => {
 	switch (type) {
 		case 'string':
 			return 'z.string()'
@@ -46,7 +51,7 @@ const getSchemaForType = (type: string, tokens: TokenizedDefinition, subSchema?:
 		case 'set':
 			return 'z.array(z.unknown())'
 		case 'array':
-			return getArrayType(tokens)
+			return getArrayType(tokens, isInputSchema)
 		case 'number':
 		case 'float':
 		case 'int':
@@ -57,11 +62,9 @@ const getSchemaForType = (type: string, tokens: TokenizedDefinition, subSchema?:
 		case 'object':
 			return subSchema ?? 'z.object({})'
 		case 'record': {
-			const type = tokens.type?.match(recordRegex)?.[1]
-			if (type) {
-				return `recordId('${type}')`
-			}
-			return 'z.string()'
+			const recordMatch = tokens.type?.match(recordRegex)
+			const recordType = recordMatch?.[1]
+			return recordType ? `recordId('${recordType}')` : 'recordId()'
 		}
 		default:
 			return 'z.unknown()'
@@ -73,7 +76,7 @@ export const getZodTypeFromQLType = (tokens: TokenizedDefinition, isInputSchema:
 
 	if (match?.[1]) {
 		const type = match[1].toLowerCase() as SchemaType
-		let schema = getSchemaForType(type, tokens, subSchema)
+		let schema = getSchemaForType(type, tokens, isInputSchema, subSchema)
 
 		if (tokens.assert) {
 			schema = handleAssertions(schema, tokens.assert, type)
