@@ -33,7 +33,7 @@ export function recordId<Table extends string = string>(table?: Table) {
         }
         return val as TableRecordId<Table>;
     });
-}`;
+}`
 
 	await mkdirp(rootPath)
 
