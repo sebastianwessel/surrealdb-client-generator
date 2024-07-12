@@ -112,6 +112,51 @@ describe('getDetailsFromDefinition', () => {
 			expect(result.zodString).toBe('z.string().optional()')
 		})
 
+		it('returns a record with defined type', () => {
+			const result = getDetailsFromDefinition(
+				'DEFINE FIELD record ON TABLE product TYPE record<test>;',
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe(`recordId('test')`)
+		})
+
+		it('returns an array of records with defined type', () => {
+			const result = getDetailsFromDefinition(
+				'DEFINE FIELD record ON TABLE product TYPE array<record<test>>;',
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe(`recordId('test').array()`)
+		})
+
+		it('returns an array of records without defined types', () => {
+			const result = getDetailsFromDefinition(
+				'DEFINE FIELD record ON TABLE product TYPE array<record>;',
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe(`recordId().array()`)
+		})
+
+		it('returns an optional array of records with defined type', () => {
+			const result = getDetailsFromDefinition(
+				'DEFINE FIELD record ON TABLE product TYPE option<array<record<test>>>;',
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe(`recordId('test').array().optional()`)
+		})
+
+		it('returns an optional array of records without defined types', () => {
+			const result = getDetailsFromDefinition(
+				'DEFINE FIELD record ON TABLE product TYPE option<array<record>>;',
+				isInputSchema,
+			)
+
+			expect(result.zodString).toBe(`recordId().array().optional()`)
+		})
+
 		it('returns required string for optional string with default', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD description ON TABLE product TYPE option<string> DEFAULT "hello";',
