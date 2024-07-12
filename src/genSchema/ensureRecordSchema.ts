@@ -9,7 +9,7 @@ import { RecordId } from 'surrealdb.js'
 export const ZRecordIdInstanceOf = z.instanceof(RecordId);
 
 export function recordId<Table extends string = string>(table?: Table) {
-  return z.custom<RecordId<\`$Table\`>>(
+  return z.custom<RecordId<Table>>(
     val => {
       const instanceOfCheck = ZRecordIdInstanceOf.safeParse(val);
       const tableCheck = table ? val?.tb === table : true;
