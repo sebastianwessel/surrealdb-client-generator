@@ -4,29 +4,36 @@ import { mkdirp } from 'mkdirp'
 
 export const ensureRecordSchema = async (rootPath: string) => {
 	const content = `import z from 'zod';
-import { RecordId } from 'surrealdb.js'
+import { RecordId, StringRecordId } from 'surrealdb.js'
 
-export const ZRecordIdInstanceOf = z.instanceof(RecordId);
+type TableRecordId<T extends string> = RecordId<T> | StringRecordId | \`\${T}:\${string}\`;
 
 export function recordId<Table extends string = string>(table?: Table) {
-  return z.custom<RecordId<Table>>(
-    val => {
-      const instanceOfCheck = ZRecordIdInstanceOf.safeParse(val);
-      const tableCheck = table ? val?.tb === table : true;
-      return instanceOfCheck.success && tableCheck;
-    },
-    val => {
-      let msgArray: string[] = [];
-      const instanceOfCheck = ZRecordIdInstanceOf.safeParse(val);
-      if (!instanceOfCheck.success) msgArray.push('Must be a RecordId class');
+    const tableRegex = table ? table : '[A-Za-z_][A-Za-z0-9_]*';
+    const idRegex = '[^:]+';
+    const fullRegex = new RegExp(\`^\${tableRegex}:\${idRegex}$\`);
 
-      const tableCheck = table ? val?.tb === table : true;
-      if (!tableCheck) msgArray.push(\`RecordId must be of type '\${table}', not '\${val?.tb}'\`);
-
-      return { message: msgArray.join("; ") };
-    }
-  );
-}`
+    return z.union([
+        z.custom<RecordId<string>>((val): val is RecordId<string> => val instanceof RecordId)
+            .refine((val): val is RecordId<Table> => !table || val.tb === table, {
+                message: table ? \`RecordId must be of type '\${table}'\` : undefined
+            }),
+        z.custom<StringRecordId>((val): val is StringRecordId => val instanceof StringRecordId)
+            .refine((val) => !table || val.rid.startsWith(\`\${table}:\`), {
+                message: table ? \`StringRecordId must start with '\${table}:'\` : undefined
+            }),
+        z.string().regex(fullRegex, {
+            message: table
+                ? \`Invalid record ID format. Must be '\${table}:id'\`
+                : "Invalid record ID format. Must be 'table:id'"
+        })
+    ]).transform((val): TableRecordId<Table> => {
+        if (typeof val === 'string') {
+            return new StringRecordId(val) as TableRecordId<Table>;
+        }
+        return val as TableRecordId<Table>;
+    });
+}`;
 
 	await mkdirp(rootPath)
 
