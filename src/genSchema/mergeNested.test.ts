@@ -43,7 +43,7 @@ describe('mergeNested', () => {
                     price: z.number(),
                     ratings: z.object({
                         score: z.number().optional()
-                    }).optional()
+                    }).array().optional()
                 }).array().optional()
             })
         `)
