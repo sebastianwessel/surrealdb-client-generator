@@ -1,6 +1,16 @@
 import type { FieldDetail } from './getDetailsFromDefinition.js'
 
+const escapeRegExp = (string:string) => {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+const createRegex = (key:string) => {
+	const escapedKey = escapeRegExp(key);
+	return new RegExp(`(?<!${escapedKey})\\[\\*\\]`, 'g');
+};
+
 export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string): string => {
+	console.log("fields", fields)
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const buildSchema = (fieldMap: { [key: string]: any }, fields: FieldDetail[]) => {
 		for (const field of fields) {
@@ -15,9 +25,6 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 				if (i === parts.length - 1) {
 					// Leaf node
 					let zodString = field.zodString
-					if (field.type?.startsWith('array')) {
-						zodString = `z.array(${zodString})`
-					}
 					if (fieldDefault !== undefined) {
 						zodString += `.default(${fieldDefault})`
 					}
@@ -39,8 +46,13 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 		const buildObject = (obj: { [key: string]: any }, parentKey = ''): string => {
 			const entries = Object.entries(obj).map(([key, value]) => {
 				const fullKey = parentKey ? `${parentKey}.${key}` : key
+				const regex = createRegex(key)
+				const isArray = fields.some(f => {
+					return	f.name.replace(regex, '').includes(`${fullKey}[*]`)
+				})
+
 				if (typeof value === 'string') {
-					return `${key}: ${value}`
+					return `${key}: ${value}${isArray ? '.array()' : ''}`
 				}
 				const innerObject = buildObject(value, fullKey)
 				let objectSchema = `z.object({\n${innerObject}\n  })`
@@ -52,8 +64,7 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 				const fieldSchema = fields.find(f => f.name === fullKey)
 				const isOptionalFromSchema = fieldSchema?.zodString.includes('.optional()')
 
-				// Check if this object should be an array
-				if (fields.some(f => f.name.includes(`${fullKey}[*]`))) {
+				if (isArray) {
 					objectSchema += '.array()'
 				}
 
@@ -65,6 +76,7 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 			})
 			return entries.join(',\n  ')
 		}
+
 
 		const schema = `z.object({\n${buildObject(fieldMap)}\n})`
 		return `const ${schemaName} = ${schema}`
