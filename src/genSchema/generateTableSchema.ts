@@ -96,17 +96,19 @@ export ${outputFields};
 
 import { z } from "zod";
 
-import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated/${tableName}/${tableName}SchemaGen.js";
+import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated/index.js";
+import { recordId } from "../../_generated/recordSchema.js";
 
 // payload schema for creating a new ${name} entity
 export const ${tableName}CreateSchema = ${tableName}InputSchemaGen.merge(z.object({
+  id: recordId("${tableName}").optional()
   // add your custom fields here, which are not part of SurrealDB table schema
   // they are not overwritten by the next run
       }))
 
 // payload schema for fetching a ${name} entity
 export const ${tableName}Schema = ${tableName}OutputSchemaGen.merge(z.object({
-  id: z.object({ tb: z.string(), id: z.string() }),
+  id: recordId("${tableName}"),
   // add your custom fields here, which are not part of SurrealDB table schema
   // they are not overwritten by the next run
       }))
