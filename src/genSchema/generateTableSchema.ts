@@ -96,7 +96,7 @@ export ${outputFields};
 
 import { z } from "zod";
 
-import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated/${tableName}/${tableName}SchemaGen.js";
+import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated";
 import { recordId } from "../../_generated/recordSchema.js";
 
 // payload schema for creating a new ${name} entity
