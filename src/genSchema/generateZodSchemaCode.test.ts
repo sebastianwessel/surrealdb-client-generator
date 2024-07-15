@@ -1,41 +1,47 @@
+import { generateZodSchemaCode } from './generateZodSchemaCode.js'
 import { getDetailsFromDefinition } from './getDetailsFromDefinition.js'
-import {generateZodSchemaCode} from "./generateZodSchemaCode.js";
 
 describe('generateZodSchemaCode', () => {
-    describe('basic schema', () => {
-        it('returns schema for simple object', () => {
-            const definition = `
+	describe('basic schema', () => {
+		it('returns schema for simple object', () => {
+			const definition = `
                 DEFINE FIELD reviews ON TABLE product TYPE array<string>;
                 DEFINE FIELD user ON TABLE product TYPE record<user>;
                 DEFINE FIELD rating ON TABLE product TYPE number;
             `
-            const fields = definition.split(';').filter(x => x.trim().length).map(def => getDetailsFromDefinition(def, false))
-            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			const generatedSchema = generateZodSchemaCode(fields, 'schema')
 
-            expect(generatedSchema).toEqualIgnoringWhitespace(`
+			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
                     reviews: z.array(z.string()),
                     user: recordId('user'),
                     rating: z.number()
                 })
             `)
-        })
-    })
+		})
+	})
 
-    describe('object schema', () => {
-        it('returns schema for simple object', () => {
-            const definition = `
+	describe('object schema', () => {
+		it('returns schema for simple object', () => {
+			const definition = `
                 DEFINE FIELD review ON TABLE product TYPE object;
                 DEFINE FIELD review.rating ON TABLE product TYPE number;
                 DEFINE FIELD review.comment ON TABLE product TYPE string;
             `
-            const fields = definition.split(';').filter(x => x.trim().length).map(def => getDetailsFromDefinition(def, false))
-            console.log("fields", fields)
-            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			console.log('fields', fields)
+			const generatedSchema = generateZodSchemaCode(fields, 'schema')
 
-            console.log("generatedSchema", generatedSchema)
+			console.log('generatedSchema', generatedSchema)
 
-            expect(generatedSchema).toEqualIgnoringWhitespace(`
+			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
                     review: z.object({
                         rating: z.number(),
@@ -43,21 +49,24 @@ describe('generateZodSchemaCode', () => {
                     })
                 })
             `)
-        })
+		})
 
-        it('returns schema for optional object', () => {
-            const definition = `
+		it('returns schema for optional object', () => {
+			const definition = `
                 DEFINE FIELD review ON TABLE product TYPE option<object>;
                 DEFINE FIELD review.rating ON TABLE product TYPE number;
                 DEFINE FIELD review.comment ON TABLE product TYPE string;
             `
-            const fields = definition.split(';').filter(x => x.trim().length).map(def => getDetailsFromDefinition(def, false))
-            console.log("fields", fields)
-            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			console.log('fields', fields)
+			const generatedSchema = generateZodSchemaCode(fields, 'schema')
 
-            console.log("generatedSchema", generatedSchema)
+			console.log('generatedSchema', generatedSchema)
 
-            expect(generatedSchema).toEqualIgnoringWhitespace(`
+			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
                     review: z.object({
                         rating: z.number(),
@@ -65,21 +74,24 @@ describe('generateZodSchemaCode', () => {
                     }).optional()
                 })
             `)
-        })
+		})
 
-        it('returns schema for optional object derived from all values being optional', () => {
-            const definition = `
+		it('returns schema for optional object derived from all values being optional', () => {
+			const definition = `
                 DEFINE FIELD review ON TABLE product TYPE object;
                 DEFINE FIELD review.rating ON TABLE product TYPE option<number>;
                 DEFINE FIELD review.comment ON TABLE product TYPE option<string>;
             `
-            const fields = definition.split(';').filter(x => x.trim().length).map(def => getDetailsFromDefinition(def, false))
-            console.log("fields", fields)
-            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			console.log('fields', fields)
+			const generatedSchema = generateZodSchemaCode(fields, 'schema')
 
-            console.log("generatedSchema", generatedSchema)
+			console.log('generatedSchema', generatedSchema)
 
-            expect(generatedSchema).toEqualIgnoringWhitespace(`
+			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
                     review: z.object({
                         rating: z.number().optional(),
@@ -87,20 +99,22 @@ describe('generateZodSchemaCode', () => {
                     }).optional()
                 })
             `)
-        })
+		})
 
-        it('returns schema for object with nested array', () => {
-            const definition = `
+		it('returns schema for object with nested array', () => {
+			const definition = `
                 DEFINE FIELD review ON TABLE product TYPE object;
                 DEFINE FIELD review.related ON TABLE product TYPE array<object>;
                 DEFINE FIELD review.related[*].name ON TABLE product TYPE string;
                 DEFINE FIELD review.related[*].rating ON TABLE product TYPE number;
             `
-            const fields = definition.split(';').filter(x => x.trim().length).map(def => getDetailsFromDefinition(def, false))
-            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			const generatedSchema = generateZodSchemaCode(fields, 'schema')
 
-
-            expect(generatedSchema).toEqualIgnoringWhitespace(`
+			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
                     review: z.object({
                         related: z.object({
@@ -110,10 +124,10 @@ describe('generateZodSchemaCode', () => {
                     })
                 })
             `)
-        })
+		})
 
-        it('returns schema for complex object', () => {
-            const definition = `
+		it('returns schema for complex object', () => {
+			const definition = `
                 DEFINE FIELD name ON TABLE product TYPE string;
                 DEFINE FIELD price ON TABLE product TYPE number;
                 DEFINE FIELD published_at ON TABLE product TYPE datetime;
@@ -136,13 +150,16 @@ describe('generateZodSchemaCode', () => {
                 DEFINE FIELD review.related[*].meta.comment ON TABLE product TYPE string;
                 DEFINE FIELD review.related[*].meta.tags ON TABLE product TYPE array<string>;
             `
-            const fields = definition.split(';').filter(x => x.trim().length).map(def => getDetailsFromDefinition(def, false))
-            console.log("fields", fields)
-            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			console.log('fields', fields)
+			const generatedSchema = generateZodSchemaCode(fields, 'schema')
 
-            console.log("generatedSchema", generatedSchema)
+			console.log('generatedSchema', generatedSchema)
 
-            expect(generatedSchema).toEqualIgnoringWhitespace(`
+			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
                     name: z.string(),
                     price: z.number(),
@@ -171,10 +188,10 @@ describe('generateZodSchemaCode', () => {
                     })
                 })
             `)
-        })
+		})
 
-        it('returns schema for complex object with duplicate field with asterisk syntax', () => {
-            const definition = `
+		it('returns schema for complex object with duplicate field with asterisk syntax', () => {
+			const definition = `
                 DEFINE FIELD review ON TABLE product TYPE object;
                 DEFINE FIELD review.rating ON TABLE product TYPE number;
                 DEFINE FIELD review.comment ON TABLE product TYPE string;
@@ -185,10 +202,13 @@ describe('generateZodSchemaCode', () => {
                 DEFINE FIELD review.author.tags[*] ON TABLE product TYPE string;
                 DEFINE FIELD review.author.user ON TABLE product TYPE record<user>;
             `
-            const fields = definition.split(';').filter(x => x.trim().length).map(def => getDetailsFromDefinition(def, false))
-            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			const generatedSchema = generateZodSchemaCode(fields, 'schema')
 
-            expect(generatedSchema).toEqualIgnoringWhitespace(`
+			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
                     review: z.object({
                         rating: z.number(),
@@ -202,7 +222,6 @@ describe('generateZodSchemaCode', () => {
                     })
                 })
             `)
-        })
-
-    })
+		})
+	})
 })

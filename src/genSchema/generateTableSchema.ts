@@ -53,7 +53,8 @@ export const generateTableSchema = async (outFolder: string, tableInfo: Record<s
 		const generatedFiles: string[] = []
 
 		for (const name in tableInfo) {
-			const { inputFields, outputFields } = await generateSchemaForTable(name, tableInfo[name]!)
+			const info = tableInfo[name] as string
+			const { inputFields, outputFields } = await generateSchemaForTable(name, info)
 
 			const tableName = toCamelCase(name)
 			const tableSchemaFolder = resolve(genSchemaFolder, tableName)
@@ -166,7 +167,6 @@ export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema>
 		} else {
 			console.log(' ❎ _generated/index.ts already exists')
 		}
-
 	} catch (error) {
 		console.error('An error occurred during schema generation:', error)
 		throw error
