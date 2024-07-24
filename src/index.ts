@@ -7,7 +7,7 @@ import { program } from 'commander'
 import { configFileSchema } from './config/configFileSchema.js'
 import { closeDb, connectDb, insertDefinitions } from './database/db.js'
 import { getAllTableInfo } from './database/getAllTableInfo.js'
-import { generateClientJs } from './genClient/generateClientJs.js'
+import { generateClientFiles } from './genClient/generateClientFiles.js'
 import { generateTableSchema } from './genSchema/generateTableSchema.js'
 import { printSorry } from './helper/printSorry.js'
 
@@ -19,6 +19,7 @@ const main = async () => {
 
 	program
 		.option('-f, --schemaFile [schemaFile]', 'a SurrealQL file containing the definitions')
+		.option('-i, --import [extesnion]', 'import extension (js/ts)', 'js')
 		.option('-c, --config [config]', 'config file', 'surql-gen.json')
 		.option('-s, --surreal [surreal]', 'SurrealDB connection url', 'http://localhost:8000')
 		.option('-u, --username [username]', 'auth username', 'root')
@@ -100,7 +101,7 @@ const main = async () => {
 		await generateTableSchema(resolve(__dirname, config.outputFolder), tableInfo)
 
 		if (config.generateClient) {
-			await generateClientJs(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb.js')
+			await generateClientFiles(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb.js', config.import === 'js')
 		}
 	} catch (error) {
 		printSorry(error)

@@ -23,7 +23,7 @@ const createIndexFile = (directory: string, files: string[]) => {
 	writeFileSync(resolve(directory, 'index.ts'), indexContent)
 }
 
-export const generateClientJs = async (outputFolder: string, tableNames: string[], lib: string) => {
+export const generateClientFiles = async (outputFolder: string, tableNames: string[], lib: string, jsImport = true) => {
 	const clientFolder = resolve(outputFolder, 'client')
 	await mkdirp(clientFolder)
 
@@ -93,7 +93,7 @@ export const generateClientJs = async (outputFolder: string, tableNames: string[
 		generatedFiles.push(tableName)
 	}
 
-	const mainIndexContent = generatedFiles.map(name => `export * from './${name}/index.js';`).join('\n')
+	const mainIndexContent = generatedFiles.map(name => `export * from './${name}/index${jsImport? '.js':''}';`).join('\n')
 	writeFileSync(resolve(clientFolder, 'index.ts'), mainIndexContent)
 	console.log(' ✅ Created/Updated main client index.ts')
 }
