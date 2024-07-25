@@ -96,12 +96,13 @@ const main = async () => {
 	}
 
 	try {
+		const jsImport = config.import === 'js';
 		const tableInfo = await getAllTableInfo()
 
-		await generateTableSchema(resolve(__dirname, config.outputFolder), tableInfo)
+		await generateTableSchema(resolve(__dirname, config.outputFolder), tableInfo, jsImport)
 
 		if (config.generateClient) {
-			await generateClientFiles(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb.js', config.import === 'js')
+			await generateClientFiles(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb.js', jsImport)
 		}
 	} catch (error) {
 		printSorry(error)

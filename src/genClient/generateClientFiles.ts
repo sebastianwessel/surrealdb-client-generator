@@ -12,11 +12,11 @@ import { getDeleteEntityFileContent } from './getDeleteEntityFileContent.js'
 import { getRepositoryContent } from './getRepositoryFileContent.js'
 import { getUpdateEntityFileContent } from './getUpdateEntityFileContent.js'
 
-const createIndexFile = (directory: string, files: string[]) => {
+const createIndexFile = (directory: string, files: string[], jsImport = true) => {
 	const indexContent = files
 		.map(file => {
 			const baseName = file.replace(/\.ts$/, '')
-			return `export * from './${baseName}.js';`
+			return `export * from './${baseName}${jsImport ? '.js' : ''}';`
 		})
 		.join('\n')
 
@@ -41,27 +41,27 @@ export const generateClientFiles = async (outputFolder: string, tableNames: stri
 		const fileOperations = [
 			{
 				fileName: `get${tableNameFirstUpper}Repository.ts`,
-				content: () => getRepositoryContent(lib, tableNameFirstUpper),
+				content: () => getRepositoryContent(lib, tableNameFirstUpper, jsImport),
 			},
 			{
 				fileName: `create${tableNameFirstUpper}.ts`,
-				content: () => getCreateEntityFileContent(lib, tableName, name),
+				content: () => getCreateEntityFileContent(lib, tableName, name, jsImport),
 			},
 			{
 				fileName: `update${tableNameFirstUpper}.ts`,
-				content: () => getUpdateEntityFileContent(lib, tableName),
+				content: () => getUpdateEntityFileContent(lib, tableName, jsImport),
 			},
 			{
 				fileName: `delete${tableNameFirstUpper}.ts`,
-				content: () => getDeleteEntityFileContent(lib, tableName),
+				content: () => getDeleteEntityFileContent(lib, tableName, jsImport),
 			},
 			{
 				fileName: `getAll${tableNameFirstUpper}s.ts`,
-				content: () => getAllEntityFileContent(lib, tableName, name),
+				content: () => getAllEntityFileContent(lib, tableName, name, jsImport),
 			},
 			{
 				fileName: `get${tableNameFirstUpper}ById.ts`,
-				content: () => getByIdEntityFileContent(lib, tableName),
+				content: () => getByIdEntityFileContent(lib, tableName, jsImport),
 			},
 		]
 
@@ -87,7 +87,7 @@ export const generateClientFiles = async (outputFolder: string, tableNames: stri
 		}
 
 		const allTableFiles = fileOperations.map(op => op.fileName)
-		createIndexFile(clientTableFolder, allTableFiles)
+		createIndexFile(clientTableFolder, allTableFiles, jsImport)
 		console.log(` ✅ [${tableName}]: index.ts created/updated`)
 
 		generatedFiles.push(tableName)

@@ -29,18 +29,18 @@ export const generateSchemaForTable = async (name: string, tableInfo: string) =>
 	}
 }
 
-const createIndexFile = async (directory: string, files: string[]): Promise<void> => {
+const createIndexFile = async (directory: string, files: string[], jsImport = true): Promise<void> => {
 	const indexContent = files
 		.map(file => {
 			const baseName = file.replace(/\.ts$/, '')
-			return `export * from './${baseName}.js';`
+			return `export * from './${baseName}${jsImport ? '.js':''}';`
 		})
 		.join('\n')
 
 	await fs.writeFile(resolve(directory, 'index.ts'), indexContent)
 }
 
-export const generateTableSchema = async (outFolder: string, tableInfo: Record<string, string>): Promise<void> => {
+export const generateTableSchema = async (outFolder: string, tableInfo: Record<string, string>, jsImport = true): Promise<void> => {
 	try {
 		await mkdirp(outFolder)
 
@@ -72,7 +72,7 @@ export const generateTableSchema = async (outFolder: string, tableInfo: Record<s
 // ====================
 
 import { z } from "zod";
-${injectRecordSchema ? 'import { recordId } from "../recordSchema.js"' : ''}
+${injectRecordSchema ? 'import { recordId } from "../recordSchema' +(jsImport ? '.js':'') + '"' : ''}
 
 // the create schema for table ${name}
 export ${inputFields};
@@ -97,8 +97,8 @@ export ${outputFields};
 
 import { z } from "zod";
 
-import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated/index.js";
-import { recordId } from "../../_generated/recordSchema.js";
+import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated/index${jsImport ? '.js':''}";
+import { recordId } from "../../_generated/recordSchema${jsImport ? '.js':''}";
 
 // payload schema for creating a new ${name} entity
 export const ${tableName}CreateSchema = ${tableName}InputSchemaGen.merge(z.object({
@@ -129,7 +129,7 @@ export const ${tableName}Schema = ${tableName}OutputSchemaGen.merge(z.object({
 import { z } from "zod";
 import { type RecordId} from "surrealdb.js";
 
-import { ${tableName}CreateSchema, ${tableName}Schema } from "./${tableName}Schema.js";
+import { ${tableName}CreateSchema, ${tableName}Schema } from "./${tableName}Schema${jsImport ? '.js':''}";
 
 // the create type for table ${name}
 export type ${toUpperCamelCase(tableName)}Create = z.input<typeof ${tableName}CreateSchema>
@@ -145,7 +145,7 @@ export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema>
 
 			const indexFileName = resolve(schemaFolder, 'index.ts')
 			if (!(await fs.stat(indexFileName).catch(() => false))) {
-				await createIndexFile(schemaFolder, [schemaFileName, typeFileName])
+				await createIndexFile(schemaFolder, [schemaFileName, typeFileName], jsImport)
 				console.log(` ✅ [${tableName}]: index.ts`)
 			} else {
 				console.log(` ❎ [${tableName}]: index.ts already exists`)
@@ -155,14 +155,14 @@ export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema>
 		const mainSchemaFolder = resolve(outFolder, 'schema')
 		const mainIndexFileName = resolve(mainSchemaFolder, 'index.ts')
 		const mainIndexContent = Object.keys(tableInfo)
-			.map(name => `export * from './${toCamelCase(name)}/index.js';`)
+			.map(name => `export * from './${toCamelCase(name)}/index${jsImport ? '.js':''}';`)
 			.join('\n')
 		await fs.writeFile(mainIndexFileName, mainIndexContent)
 		console.log(' ✅ Created/Updated main schema index.ts')
 
 		const genIndexFileName = resolve(genSchemaFolder, 'index.ts')
 		if (!(await fs.stat(genIndexFileName).catch(() => false))) {
-			await createIndexFile(genSchemaFolder, generatedFiles)
+			await createIndexFile(genSchemaFolder, generatedFiles, jsImport)
 			console.log(' ✅ Created _generated/index.ts')
 		} else {
 			console.log(' ❎ _generated/index.ts already exists')
