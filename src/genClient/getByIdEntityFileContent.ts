@@ -1,6 +1,6 @@
 import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
 
-export const getByIdEntityFileContent = (lib: string, entityName: string) => {
+export const getByIdEntityFileContent = (lib: string, entityName: string, jsImport = true) => {
 	const entityNameFirstUpper = `${toUpperCamelCase(entityName)}`
 	const entityTypeName = `${toUpperCamelCase(entityName)}`
 	const entitySchemaName = `${entityName}Schema`
@@ -8,8 +8,8 @@ export const getByIdEntityFileContent = (lib: string, entityName: string) => {
 	return `
 import { RecordId, type Surreal } from "${lib}";
 
-import { ${entitySchemaName} } from "../../schema/${entityName}/${entityName}Schema.js";
-import type { ${entityTypeName} } from "../../schema/${entityName}/${entityName}Types.js";
+import { ${entitySchemaName} } from "../../schema/${entityName}/${entityName}Schema${jsImport ? '.js':''}";
+import type { ${entityTypeName} } from "../../schema/${entityName}/${entityName}Types${jsImport ? '.js':''}";
 
 export const get${entityNameFirstUpper}ById = async function (db: Surreal, id: RecordId<string>) {
   const key = ${entitySchemaName}.pick({ id: true }).parse({ id });
