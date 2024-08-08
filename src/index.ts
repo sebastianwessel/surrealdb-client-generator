@@ -26,6 +26,7 @@ const main = async () => {
 		.option('-n, --ns [ns]', 'the namespace', 'test')
 		.option('-d, --db [db]', 'the database', 'test')
 		.option('-o, --outputFolder [outputFolder]', 'output folder', 'client_generated')
+		.option('-og, --outputGenFolder [outputGenFolder]', 'output Generated folder', '__generated')
 		.option('-g, --generateClient', 'generate client', true)
 		.option('--no-generateClient', 'no client generation')
 
@@ -97,7 +98,7 @@ const main = async () => {
 	try {
 		const tableInfo = await getAllTableInfo()
 
-		await generateTableSchema(resolve(__dirname, config.outputFolder), tableInfo)
+		await generateTableSchema(resolve(__dirname, config.outputFolder), config.outputGenFolder, tableInfo)
 
 		if (config.generateClient) {
 			await generateClientJs(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb.js')
