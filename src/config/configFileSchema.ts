@@ -8,5 +8,6 @@ export const configFileSchema = z.object({
 	username: z.string().default('root'),
 	password: z.string().default('root'),
 	outputFolder: z.string().default('client_generated'),
+	outputGenFolder: z.string().default('__generated'),
 	generateClient: z.boolean().default(true),
 })
