@@ -107,6 +107,9 @@ export const ${tableName}CreateSchema = ${tableName}InputSchemaGen.merge(z.objec
   // they are not overwritten by the next run
       }))
 
+// payload schema for inserting many ${name} entity
+export const ${tableName}InsertSchema = ${tableName}CreateSchema.array()
+
 // payload schema for fetching a ${name} entity
 export const ${tableName}Schema = ${tableName}OutputSchemaGen.merge(z.object({
   id: recordId("${tableName}"),

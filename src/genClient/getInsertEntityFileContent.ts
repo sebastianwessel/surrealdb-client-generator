@@ -1,7 +1,7 @@
 import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
 
 export const getInsertEntityFileContent = (lib: string, entityName: string, tableName: string) => {
-	const entitySchemaName = `${entityName}CreateSchema`
+	const entitySchemaName = `${entityName}InsertSchema`
 	const entityNameFirstUpper = `${toUpperCamelCase(entityName)}`
 	const entityInsertTypeName = `${toUpperCamelCase(entityName)}Insert`
 
