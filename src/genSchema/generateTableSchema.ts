@@ -134,6 +134,9 @@ import { ${tableName}CreateSchema, ${tableName}Schema } from "./${tableName}Sche
 // the create type for table ${name}
 export type ${toUpperCamelCase(tableName)}Create = z.input<typeof ${tableName}CreateSchema>
 
+// the insert type for table ${name}
+export type ${toUpperCamelCase(tableName)}Insert = ${toUpperCamelCase(tableName)}Create[]
+
 // the select type for table ${name}
 export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema> & {id: RecordId<string>}
       `
