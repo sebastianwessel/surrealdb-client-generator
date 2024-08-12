@@ -4,7 +4,7 @@ import { mkdirp } from 'mkdirp'
 
 export const ensureRecordSchema = async (rootPath: string) => {
 	const content = `import z from 'zod';
-import { RecordId, StringRecordId } from 'surrealdb.js'
+import { RecordId, StringRecordId } from 'surrealdb'
 
 type TableRecordId<T extends string> = RecordId<T> | StringRecordId | \`\${T}:\${string}\`;
 

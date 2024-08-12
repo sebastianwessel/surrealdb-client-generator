@@ -100,7 +100,7 @@ const main = async () => {
 		await generateTableSchema(resolve(__dirname, config.outputFolder), tableInfo)
 
 		if (config.generateClient) {
-			await generateClientJs(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb.js')
+			await generateClientJs(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb')
 		}
 	} catch (error) {
 		printSorry(error)

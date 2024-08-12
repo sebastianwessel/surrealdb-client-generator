@@ -127,7 +127,7 @@ export const ${tableName}Schema = ${tableName}OutputSchemaGen.merge(z.object({
 				const typeFileContent = `/* Place your custom changes here */
 
 import { z } from "zod";
-import { type RecordId} from "surrealdb.js";
+import { type RecordId} from "surrealdb";
 
 import { ${tableName}CreateSchema, ${tableName}Schema } from "./${tableName}Schema.js";
 
