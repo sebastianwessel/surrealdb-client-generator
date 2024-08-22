@@ -26,6 +26,7 @@ This means, the option "memory" for connections is no longer available, and you 
 1. If you provide a surql schema file:
  - An in-memory SurrealDB instance is automatically created.
  - The schema is loaded into this temporary instance.
+ - Docker is required to run the temporary instance.
 2. If no schema file is provided:
  - SurrealDB Schema Generator connects to your specified database.
 3. The generator extracts the `DEFINE` information from the connected database (either in-memory or external).
