@@ -104,8 +104,7 @@ Example:
 ```
 
 ## Using a Schema File
-
-If a schema file is provided an in-memory SurrealDB instance is created and the schema is loaded into this instance, no connection to a real SurrealDB instance is needed.
+> **_NOTE:_**  Docker is required to run SurrealDB in memory.
 
 To use a schema file either provide the -f flag:
 ```bash
