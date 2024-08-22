@@ -23,10 +23,15 @@ This means, the option "memory" for connections is no longer available, and you 
 
 ## How It Works
 
-1. SurrealDB Schema Generator connects to your specified database
-2. If you provide a surql schema file, the SurrealQL schema is written to the database
-3. The generator extracts the `DEFINE` information from the connected database
-4. Based on the definitions found in the database, the zod schemas are generated
+1. If you provide a surql schema file:
+ - An in-memory SurrealDB instance is automatically created.
+ - The schema is loaded into this temporary instance.
+ - Docker is required to run the temporary instance.
+2. If no schema file is provided:
+ - SurrealDB Schema Generator connects to your specified database.
+3. The generator extracts the `DEFINE` information from the connected database (either in-memory or external).
+4. Based on the definitions found in the database, the zod schemas are generated.
+
 
 Enjoy using SurrealDB Schema Generator to streamline your schema generation process for SurrealDB and zod.
 It's designed to make your life easier when working with these powerful technologies.
@@ -98,6 +103,27 @@ Example:
   "lib": "surrealdb.js"
 }
 ```
+
+## Using a Schema File
+> **_NOTE:_**  Docker is required to run SurrealDB in memory.
+
+To use a schema file either provide the -f flag:
+```bash
+surql-gen -f ./path/to/your/schema.surql
+ ```
+
+or you can specify the path in the config file:
+```json
+{
+  "schemaFile": "./path/to/your/schema.surql"
+}
+```
+
+## Connecting to an Existing SurrealDB Instance
+
+To connect to an existing SurrealDB instance, simply omit the `-f` option, or omit the `schemaFile` in the config file.
+
+In this case, you need to provide the connection information for your running instance.
 
 ## Code Generation Structure
 

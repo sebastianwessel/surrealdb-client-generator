@@ -6,7 +6,17 @@
 		"node": ">=18"
 	},
 	"description": "A small tool which generates a typescript client for SurrealDB based on the schema of a given database",
-	"keywords": ["typescript", "surrealdb", "client", "javascript", "zod", "orm", "database", "generator", "tool"],
+	"keywords": [
+		"typescript",
+		"surrealdb",
+		"client",
+		"javascript",
+		"zod",
+		"orm",
+		"database",
+		"generator",
+		"tool"
+	],
 	"author": {
 		"name": "Sebastian Wessel",
 		"url": "https://github.com/sebastianwessel"
@@ -21,7 +31,9 @@
 		"email": "project@hostname.com"
 	},
 	"license": "MIT",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"bin": {
 		"surql-gen": "./dist/commonjs/index.js"
 	},
@@ -37,8 +49,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
 		"@types/node": "^20.14.10",
-		"tshy": "^3.0.2",
 		"jsr": "^0.12.4",
+		"tshy": "^3.0.2",
 		"tsx": "^4.15.7",
 		"typescript": "^5.5.2",
 		"vitest": "^2.0.1"
@@ -48,6 +60,7 @@
 		"mkdirp": "^3.0.1",
 		"rimraf": "^6.0.0",
 		"surrealdb.js": "^1.0.0-beta.9",
+		"testcontainers": "^10.11.0",
 		"zod": "^3.23.8"
 	},
 	"tshy": {
