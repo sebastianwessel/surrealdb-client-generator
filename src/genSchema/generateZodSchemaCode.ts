@@ -10,7 +10,6 @@ const createRegex = (key: string) => {
 }
 
 export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string): string => {
-	console.log('fields', fields)
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const buildSchema = (fieldMap: { [key: string]: any }, fields: FieldDetail[]) => {
 		for (const field of fields) {
