@@ -15,9 +15,9 @@
 ## 🚨 Warning Version 2.x
 
 Version 2 has breaking changes!  
-The tool now uses `surrealdb.js` instead of `surrealdb.node` for interacting with a SurrealDB instance.
+The tool now uses `surrealdb` instead of `surrealdb.node` for interacting with a SurrealDB instance.
 
-The change was made, because it seems that `surrealdb.js` is closer to the SurrealDB development process and more up to date in general.
+The change was made, because it seems that `surrealdb` is closer to the SurrealDB development process and more up to date in general.
 
 This means, the option "memory" for connections is no longer available, and you need to run against a real running SurrealDB instance (use docker).
 
@@ -100,7 +100,7 @@ Example:
   "db": "my_database",
   "outputFolder": "./out",
   "generateClient": true,
-  "lib": "surrealdb.js"
+  "lib": "surrealdb"
 }
 ```
 

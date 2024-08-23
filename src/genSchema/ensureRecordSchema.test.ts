@@ -1,4 +1,4 @@
-import { RecordId, StringRecordId } from 'surrealdb.js'
+import { RecordId, StringRecordId } from 'surrealdb'
 import { describe, expect, test } from 'vitest'
 import z from 'zod'
 

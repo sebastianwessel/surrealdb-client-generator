@@ -1,4 +1,4 @@
-import { Surreal } from 'surrealdb.js'
+import { Surreal } from 'surrealdb'
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 
 import type { Config } from '../config/types.js'
