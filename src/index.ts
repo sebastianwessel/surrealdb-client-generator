@@ -5,7 +5,7 @@ import { resolve } from 'node:path'
 import { program } from 'commander'
 
 import { configFileSchema } from './config/configFileSchema.js'
-import { connectDb, closeDb, insertDefinitions } from './database/db.js'
+import { closeDb, connectDb, insertDefinitions } from './database/db.js'
 import { getAllTableInfo } from './database/getAllTableInfo.js'
 import { generateClientJs } from './genClient/generateClientJs.js'
 import { generateTableSchema } from './genSchema/generateTableSchema.js'
@@ -89,7 +89,7 @@ const main = async () => {
 				printSorry(error)
 				process.exit(1)
 			}
-		}else{
+		} else {
 			await connectDb(config)
 		}
 
@@ -100,7 +100,6 @@ const main = async () => {
 		if (config.generateClient) {
 			await generateClientJs(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb')
 		}
-
 	} catch (error) {
 		printSorry(error)
 		process.exit(1)
