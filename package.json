@@ -6,17 +6,7 @@
 		"node": ">=18"
 	},
 	"description": "A small tool which generates a typescript client for SurrealDB based on the schema of a given database",
-	"keywords": [
-		"typescript",
-		"surrealdb",
-		"client",
-		"javascript",
-		"zod",
-		"orm",
-		"database",
-		"generator",
-		"tool"
-	],
+	"keywords": ["typescript", "surrealdb", "client", "javascript", "zod", "orm", "database", "generator", "tool"],
 	"author": {
 		"name": "Sebastian Wessel",
 		"url": "https://github.com/sebastianwessel"
@@ -31,43 +21,35 @@
 		"email": "project@hostname.com"
 	},
 	"license": "MIT",
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"bin": {
-		"surql-gen": "./dist/commonjs/index.js"
+		"surql-gen": "./dist/index.js"
 	},
 	"scripts": {
-		"start": "node dist/esm/index.js",
+		"start": "node dist/index.js",
 		"dev": "tsx src/index.ts",
-		"build": "tshy",
+		"build": "node build.mjs",
 		"lint": "npx @biomejs/biome check --write .",
 		"test": "vitest",
-		"prepublishOnly": "npm run lint && vitest --no-watch && tshy",
+		"prepublishOnly": "npm run lint && vitest --no-watch && npm run build",
 		"postpublish": "npx jsr publish"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
-		"@types/node": "^20.14.10",
-		"jsr": "^0.12.4",
-		"tshy": "^3.0.2",
-		"tsx": "^4.15.7",
-		"typescript": "^5.5.2",
-		"vitest": "^2.0.1"
+		"@types/node": "^22.5.0",
+		"esbuild": "^0.23.1",
+		"jsr": "^0.13.1",
+		"tsx": "^4.17.0",
+		"typescript": "^5.5.4",
+		"vitest": "^2.0.5"
 	},
 	"dependencies": {
 		"commander": "^12.1.0",
 		"mkdirp": "^3.0.1",
-		"rimraf": "^6.0.0",
+		"rimraf": "^6.0.1",
 		"surrealdb": "^1.0.0-beta.20",
 		"testcontainers": "^10.11.0",
 		"zod": "^3.23.8"
-	},
-	"tshy": {
-		"exports": {
-			"./package.json": "./package.json",
-			".": "./src/index.ts"
-		}
 	},
 	"exports": {
 		"./package.json": "./package.json",
@@ -75,15 +57,9 @@
 			"import": {
 				"types": "./dist/esm/index.d.ts",
 				"default": "./dist/esm/index.js"
-			},
-			"require": {
-				"types": "./dist/commonjs/index.d.ts",
-				"default": "./dist/commonjs/index.js"
 			}
 		}
 	},
-	"type": "module",
-	"main": "./dist/commonjs/index.js",
-	"types": "./dist/commonjs/index.d.ts",
-	"module": "./dist/esm/index.js"
+	"main": "./dist/index.js",
+	"module": "./dist/index.js"
 }
