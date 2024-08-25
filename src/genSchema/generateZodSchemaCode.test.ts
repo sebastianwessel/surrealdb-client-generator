@@ -82,7 +82,6 @@ describe('generateZodSchemaCode', () => {
 				.map(def => getDetailsFromDefinition(def, false))
 			const generatedSchema = generateZodSchemaCode(fields, 'schema')
 
-
 			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
                     review: z.object({

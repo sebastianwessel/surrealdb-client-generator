@@ -1,5 +1,5 @@
 import { Surreal } from 'surrealdb'
-import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
+import { GenericContainer, type StartedTestContainer, Wait } from 'testcontainers'
 
 import type { Config } from '../config/types.js'
 
@@ -13,7 +13,7 @@ export const getDb = () => {
 	throw new Error('Not connected to a database')
 }
 
-export const connectDb = async (config: Config, createInstance: boolean = false) => {
+export const connectDb = async (config: Config, createInstance = false) => {
 	if (createInstance) {
 		console.log('Starting temporary SurrealDB instance')
 		container = await new GenericContainer('surrealdb/surrealdb:latest')
