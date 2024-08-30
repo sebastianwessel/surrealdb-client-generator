@@ -32,7 +32,8 @@ async function startSurrealDBContainer(config: Config): Promise<StartedTestConta
 		if (error instanceof Error) {
 			if (error.message.includes('pull access denied') || error.message.includes('not found')) {
 				throw new Error(`Invalid or inaccessible Docker image: ${config.surrealImage}`)
-			} else if (error.message.includes('connection refused')) {
+			}
+			if (error.message.includes('connection refused')) {
 				throw new Error('Unable to connect to Docker daemon. Is Docker running?')
 			}
 		}
@@ -44,8 +45,8 @@ export const connectDb = async (config: Config, createInstance = false) => {
 	if (createInstance) {
 		try {
 			container = await startSurrealDBContainer(config)
-		} catch (error: any) {
-			console.error('Error starting SurrealDB container:', error.message)
+		} catch (error) {
+			console.error('Error starting SurrealDB container:', error instanceof Error ? error.message : error)
 			throw error // Re-throw to be caught by the caller if needed
 		}
 	}
