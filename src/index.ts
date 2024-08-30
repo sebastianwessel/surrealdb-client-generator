@@ -28,6 +28,7 @@ const main = async () => {
 		.option('-o, --outputFolder [outputFolder]', 'output folder', 'client_generated')
 		.option('-g, --generateClient', 'generate client', true)
 		.option('--no-generateClient', 'no client generation')
+		.option('-i, --surrealImage [surrealImage]', 'SurrealDB image', 'surrealdb/surrealdb:latest')
 
 	program.parse()
 

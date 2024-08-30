@@ -80,6 +80,8 @@ Options:
   -o, --outputFolder    output folder (default: client_generated)
   -g, --generateClient  generate client (default: true)
   --no-generateClient   no client generation
+  -i, --surrealImage    SurrealDB docker image (default: surrealdb/surrealdb:latest)
+  
   -h, --help            display help for command
 ```
 
@@ -100,7 +102,9 @@ Example:
   "db": "my_database",
   "outputFolder": "./out",
   "generateClient": true,
-  "lib": "surrealdb"
+  "lib": "surrealdb",
+  "surrealImage": "surrealdb/surrealdb:latest"
+  
 }
 ```
 
@@ -116,6 +120,14 @@ or you can specify the path in the config file:
 ```json
 {
   "schemaFile": "./path/to/your/schema.surql"
+}
+```
+
+using a schema file utilises a temporary in-memory SurrealDB instance to generate the zod schemas; this instance runs in a docker container.
+If you want to use a different image, you can specify it in the config file:
+```json
+{
+  "surrealImage": "surrealdb/surrealdb:latest"
 }
 ```
 
