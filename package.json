@@ -1,7 +1,7 @@
 {
 	"name": "@sebastianwessel/surql-gen",
 	"private": false,
-	"version": "2.6.0",
+	"version": "2.6.1",
 	"engines": {
 		"node": ">=18"
 	},
@@ -30,16 +30,16 @@
 		"dev": "tsx src/index.ts",
 		"build": "node build.mjs",
 		"lint": "npx @biomejs/biome check --write .",
-		"test": "vitest",
+		"test": "vitest --run",
 		"prepublishOnly": "npm run lint && vitest --no-watch && npm run build",
 		"postpublish": "npx jsr publish"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
-		"@types/node": "^22.5.0",
+		"@types/node": "^22.5.1",
 		"esbuild": "^0.23.1",
 		"jsr": "^0.13.1",
-		"tsx": "^4.17.0",
+		"tsx": "^4.19.0",
 		"typescript": "^5.5.4",
 		"vitest": "^2.0.5"
 	},
@@ -48,7 +48,7 @@
 		"mkdirp": "^3.0.1",
 		"rimraf": "^6.0.1",
 		"surrealdb": "^1.0.0-beta.20",
-		"testcontainers": "^10.11.0",
+		"testcontainers": "^10.12.0",
 		"zod": "^3.23.8"
 	},
 	"exports": {
