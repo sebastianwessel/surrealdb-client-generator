@@ -18,7 +18,7 @@ const main = async () => {
 		.version('1.0.0')
 
 	program
-		.option('-f, --schemaFile [schemaFile]', 'a SurrealQL file containing the definitions')
+		.option('-f, --schemaFile [schemaFile]', 'a SurrealQL file containing the definitions', )
 		.option('-c, --config [config]', 'config file', 'surql-gen.json')
 		.option('-s, --surreal [surreal]', 'SurrealDB connection url', 'http://localhost:8000')
 		.option('-u, --username [username]', 'auth username', 'root')
@@ -28,6 +28,7 @@ const main = async () => {
 		.option('-o, --outputFolder [outputFolder]', 'output folder', 'client_generated')
 		.option('-g, --generateClient', 'generate client', true)
 		.option('--no-generateClient', 'no client generation')
+		.option('-i, --surrealImage [surrealImage]', 'SurrealDB image', 'surrealdb/surrealdb:latest')
 
 	program.parse()
 
@@ -62,6 +63,8 @@ const main = async () => {
 	}
 
 	const config = configFileSchema.parse({ ...options, ...fileContent })
+
+	console.log("config", config)
 
 	try {
 		if (config.schemaFile) {
