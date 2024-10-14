@@ -6,8 +6,6 @@ export const ensureRecordSchema = async (rootPath: string) => {
 	const content = `import z from 'zod';
 import { RecordId, StringRecordId } from 'surrealdb'
 
-type TableRecordId<T extends string> = RecordId<T> | StringRecordId | \`\${T}:\${string}\`;
-
 export function recordId<Table extends string = string>(table?: Table) {
     const tableRegex = table ? table : '[A-Za-z_][A-Za-z0-9_]*';
     const idRegex = '[^:]+';
@@ -26,12 +24,29 @@ export function recordId<Table extends string = string>(table?: Table) {
             message: table
                 ? \`Invalid record ID format. Must be '\${table}:id'\`
                 : "Invalid record ID format. Must be 'table:id'"
+        }),
+        z.object({
+            tb: z.string(),
+            id: z.union([z.string(), z.number(), z.record(z.unknown())])
+        }).refine((val) => !table || val.tb === table, {
+            message: table ? \`RecordId must be of type '\${table}'\` : undefined
         })
-    ]).transform((val): TableRecordId<Table> => {
-        if (typeof val === 'string') {
-            return new StringRecordId(val) as TableRecordId<Table>;
+    ]).transform((val): RecordId<Table> => {
+        if (val instanceof RecordId) {
+            return val as RecordId<Table>;
         }
-        return val as TableRecordId<Table>;
+        if (val instanceof StringRecordId) {
+            const [tb!, id!] = val.rid.split(':');
+            return new RecordId(tb, id) as RecordId<Table>;
+        }
+        if (typeof val === 'string') {
+            const [tb!, id!] = val.split(':');
+            return new RecordId(tb, id) as RecordId<Table>;
+        }
+        if (typeof val === 'object' && val !== null && 'tb' in val && 'id' in val) {
+            return new RecordId(val.tb, val.id) as RecordId<Table>;
+        }
+        throw new Error('Invalid input for RecordId');
     });
 }`
 
