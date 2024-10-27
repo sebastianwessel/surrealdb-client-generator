@@ -1,16 +1,16 @@
 {
 	"compilerOptions": {
+		"outDir": "dist",
 		"declaration": true,
-		"declarationMap": true,
+		"declarationMap": false,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
-		"inlineSources": true,
 		"module": "nodenext",
 		"moduleResolution": "nodenext",
 		"noUncheckedIndexedAccess": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
-		"sourceMap": true,
+		"sourceMap": false,
 		"strict": true,
 		"target": "es2022",
 		"types": ["vitest/globals"]
