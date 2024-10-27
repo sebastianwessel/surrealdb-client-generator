@@ -36,10 +36,7 @@ describe('generateZodSchemaCode', () => {
 				.split(';')
 				.filter(x => x.trim().length)
 				.map(def => getDetailsFromDefinition(def, false))
-			console.log('fields', fields)
 			const generatedSchema = generateZodSchemaCode(fields, 'schema')
-
-			console.log('generatedSchema', generatedSchema)
 
 			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
@@ -61,10 +58,7 @@ describe('generateZodSchemaCode', () => {
 				.split(';')
 				.filter(x => x.trim().length)
 				.map(def => getDetailsFromDefinition(def, false))
-			console.log('fields', fields)
 			const generatedSchema = generateZodSchemaCode(fields, 'schema')
-
-			console.log('generatedSchema', generatedSchema)
 
 			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
@@ -86,10 +80,7 @@ describe('generateZodSchemaCode', () => {
 				.split(';')
 				.filter(x => x.trim().length)
 				.map(def => getDetailsFromDefinition(def, false))
-			console.log('fields', fields)
 			const generatedSchema = generateZodSchemaCode(fields, 'schema')
-
-			console.log('generatedSchema', generatedSchema)
 
 			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({
@@ -154,10 +145,7 @@ describe('generateZodSchemaCode', () => {
 				.split(';')
 				.filter(x => x.trim().length)
 				.map(def => getDetailsFromDefinition(def, false))
-			console.log('fields', fields)
 			const generatedSchema = generateZodSchemaCode(fields, 'schema')
-
-			console.log('generatedSchema', generatedSchema)
 
 			expect(generatedSchema).toEqualIgnoringWhitespace(`
                 const schema = z.object({

@@ -14,7 +14,7 @@ import { printSorry } from './helper/printSorry.js'
 const main = async () => {
 	program
 		.name('surql-gen')
-		.description('Generate zod schema and typescript client code from running Surreal database')
+		.description('Generate zod schema and typescript client code from running Surreal database or schema file')
 		.version('1.0.0')
 
 	program
@@ -29,6 +29,7 @@ const main = async () => {
 		.option('-og, --outputGenFolder [outputGenFolder]', 'output Generated folder', '__generated')
 		.option('-g, --generateClient', 'generate client', true)
 		.option('--no-generateClient', 'no client generation')
+		.option('-i, --surrealImage [surrealImage]', 'SurrealDB image', 'surrealdb/surrealdb:latest')
 
 	program.parse()
 
@@ -64,51 +65,49 @@ const main = async () => {
 
 	const config = configFileSchema.parse({ ...options, ...fileContent })
 
-	await connectDb(config)
-	if (config.schemaFile) {
-		const schemaFilePath = resolve(__dirname, config.schemaFile)
-		let surQLContent: Buffer
-		try {
-			surQLContent = await readFile(schemaFilePath)
-		} catch (error) {
-			const err = error as Error & { code?: string }
-			if (err.code === 'ENOENT') {
-				console.error('')
-				console.error('Unable to find schema file', schemaFilePath)
-				console.error('Please check!')
-				console.error('')
-				process.exit(1)
-			} else {
-				console.error('')
-				console.error('Please have a look at your config file!')
-				console.error('Looks like, your configuration file is invalid.')
-				console.error('')
-				throw new Error(`Invalid configuration: ${err.message}`)
-			}
-		}
-
-		try {
-			await insertDefinitions(surQLContent.toString())
-		} catch (error) {
-			printSorry(error)
-			process.exit(1)
-		}
-	}
-
 	try {
+		if (config.schemaFile) {
+			await connectDb(config, true)
+			const schemaFilePath = resolve(__dirname, config.schemaFile)
+			let schemaContent: string
+			try {
+				schemaContent = await readFile(schemaFilePath, 'utf-8')
+			} catch (error) {
+				const err = error as Error & { code?: string }
+				if (err.code === 'ENOENT') {
+					console.error('')
+					console.error('Unable to find schema file', schemaFilePath)
+					console.error('Please check!')
+					console.error('')
+					process.exit(1)
+				} else {
+					throw new Error(`Error reading schema file: ${err.message}`)
+				}
+			}
+
+			try {
+				await insertDefinitions(schemaContent)
+			} catch (error) {
+				printSorry(error)
+				process.exit(1)
+			}
+		} else {
+			await connectDb(config)
+		}
+
 		const tableInfo = await getAllTableInfo()
 
 		await generateTableSchema(resolve(__dirname, config.outputFolder), config.outputGenFolder, tableInfo)
 
 		if (config.generateClient) {
-			await generateClientJs(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb.js')
+			await generateClientJs(resolve(__dirname, config.outputFolder), Object.keys(tableInfo), 'surrealdb')
 		}
 	} catch (error) {
 		printSorry(error)
 		process.exit(1)
+	} finally {
+		await closeDb()
 	}
-
-	await closeDb()
 
 	console.log('')
 	console.log('')
