@@ -39,17 +39,20 @@ export function recordId<Table extends string = string>(table?: Table) {
             return val as RecordId<Table>;
         }
         if (val instanceof StringRecordId) {
-            const [tb!, id!] = val.rid.split(':');
+            const [tb, ...idParts] = val.rid.split(':');
+            const id = idParts.join(':');
             if (!tb || !id) throw new Error('Invalid StringRecordId format');
             return new RecordId(tb, id) as RecordId<Table>;
         }
         if (typeof val === 'string') {
-            const [tb!, id!] = val.split(':');
+            const [tb, ...idParts] = val.split(':');
+            const id = idParts.join(':');
             if (!tb || !id) throw new Error('Invalid record ID string format');
             return new RecordId(tb, id) as RecordId<Table>;
         }
         if ('rid' in val) {
-            const [tb, id] = val.rid.split(':');
+            const [tb, ...idParts] = val.rid.split(':');
+            const id = idParts.join(':');
             if (!tb || !id) throw new Error('Invalid rid object format');
             return new RecordId(tb, id) as RecordId<Table>;
         }

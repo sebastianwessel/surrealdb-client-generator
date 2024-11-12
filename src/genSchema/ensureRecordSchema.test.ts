@@ -6,64 +6,100 @@ const RecordIdValue = z.union([z.string(), z.number(), z.bigint(), z.record(z.un
 
 type RecordIdValue = z.infer<typeof RecordIdValue>
 
-type TableRecordId<T extends string> = RecordId<T> | StringRecordId | `${T}:${string}`
-
 function recordId<Table extends string = string>(table?: Table) {
-	const tableRegex = table ? table : '[A-Za-z_][A-Za-z0-9_]*'
-	const idRegex = '[^:]+'
-	const fullRegex = new RegExp(`^${tableRegex}:${idRegex}$`)
+	const tableRegex = table ? table : '[A-Za-z_][A-Za-z0-9_]*';
+	const idRegex = '[^:]+';
+	const fullRegex = new RegExp(`^${tableRegex}:${idRegex}$`);
 
-	return z
-		.union([
-			z
-				.custom<RecordId<string>>((val): val is RecordId<string> => val instanceof RecordId)
-				.refine((val): val is RecordId<Table> => !table || val.tb === table, {
-					message: table ? `RecordId must be of type '${table}'` : undefined,
-				}),
-			z
-				.custom<StringRecordId>((val): val is StringRecordId => val instanceof StringRecordId)
-				.refine(val => !table || val.rid.startsWith(`${table}:`), {
-					message: table ? `StringRecordId must start with '${table}:'` : undefined,
-				}),
-			z.string().regex(fullRegex, {
-				message: table
-					? `Invalid record ID format. Must be '${table}:id'`
-					: "Invalid record ID format. Must be 'table:id'",
+	return z.union([
+		z.custom<RecordId<string>>((val): val is RecordId<string> => val instanceof RecordId)
+			.refine((val): val is RecordId<Table> => !table || val.tb === table, {
+				message: table ? `RecordId must be of type '${table}'` : undefined
 			}),
-		])
-		.transform((val): TableRecordId<Table> => {
-			if (typeof val === 'string') {
-				return new StringRecordId(val) as TableRecordId<Table>
-			}
-			return val as TableRecordId<Table>
+		z.custom<StringRecordId>((val): val is StringRecordId => val instanceof StringRecordId)
+			.refine((val) => !table || val.rid.startsWith(`${table}:`), {
+				message: table ? `StringRecordId must start with '${table}:'` : undefined
+			}),
+		z.string().regex(fullRegex, {
+			message: table
+				? `Invalid record ID format. Must be '${table}:id'`
+				: "Invalid record ID format. Must be 'table:id'"
+		}),
+		z.object({
+			rid: z.string().regex(fullRegex)
+		}),
+		z.object({
+			tb: z.string(),
+			id: z.union([z.string(), z.number(), z.record(z.unknown())])
+		}).refine((val) => !table || val.tb === table, {
+			message: table ? `RecordId must be of type '${table}'` : undefined
 		})
+	]).transform((val): RecordId<Table> => {
+		if (val instanceof RecordId) {
+			return val as RecordId<Table>;
+		}
+		if (val instanceof StringRecordId) {
+			const [tb, ...idParts] = val.rid.split(':');
+			const id = idParts.join(':');
+			if (!tb || !id) throw new Error('Invalid StringRecordId format');
+			return new RecordId(tb, id) as RecordId<Table>;
+		}
+		if (typeof val === 'string') {
+			const [tb, ...idParts] = val.split(':');
+			const id = idParts.join(':');
+			if (!tb || !id) throw new Error('Invalid record ID string format');
+			return new RecordId(tb, id) as RecordId<Table>;
+		}
+		if ('rid' in val) {
+			const [tb, ...idParts] = val.rid.split(':');
+			const id = idParts.join(':');
+			if (!tb || !id) throw new Error('Invalid rid object format');
+			return new RecordId(tb, id) as RecordId<Table>;
+		}
+		if ('tb' in val && 'id' in val) {
+			return new RecordId(val.tb, val.id) as RecordId<Table>;
+		}
+		throw new Error('Invalid input for RecordId');
+	});
 }
 
 describe('recordId type tests', () => {
 	const createRecordId = (tb: string, id: RecordIdValue) => new RecordId(tb, id)
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	const createStringRecordId = (tb: string, id: string | number | object | any[]) =>
-		new StringRecordId(`${tb}:${typeof id === 'object' ? JSON.stringify(id) : id}`)
+	const createStringRecordId = (tb: string, id: string | number | object | any[]) => {
+		const idStr = typeof id === 'object' ? JSON.stringify(id) : String(id);
+		return new StringRecordId(`${tb}:${idStr}`);
+	}
 
 	test('Valid simple RecordId', () => {
 		const schema = recordId()
 		const result = schema.safeParse(createRecordId('internet', 'test'))
 		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe('test')
+		}
 	})
 
-	test('Valid simple StringRecordId', () => {
+	test('Valid simple StringRecordId - transforms to RecordId', () => {
 		const schema = recordId()
 		const result = schema.safeParse(createStringRecordId('internet', 'test'))
 		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe('test')
+		}
 	})
 
-	test('Valid simple string (transformed to StringRecordId)', () => {
+	test('Valid simple string - transforms to RecordId', () => {
 		const schema = recordId()
 		const result = schema.safeParse('internet:test')
 		expect(result.success).toBe(true)
 		if (result.success) {
-			expect(result.data).toBeInstanceOf(StringRecordId)
-			expect((result.data as StringRecordId).rid).toBe('internet:test')
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe('test')
 		}
 	})
 
@@ -77,26 +113,69 @@ describe('recordId type tests', () => {
 		const schema = recordId()
 		const result = schema.safeParse(createRecordId('internet', 9000))
 		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe(9000)
+		}
 	})
 
-	test('Valid numeric StringRecordId', () => {
+	test('Valid numeric StringRecordId - transforms to RecordId', () => {
 		const schema = recordId()
 		const result = schema.safeParse(createStringRecordId('internet', 9000))
 		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe('9000')
+		}
 	})
 
 	test('Valid object-based RecordId', () => {
 		const schema = recordId()
-		const result = schema.safeParse(createRecordId('temperature', { location: 'London', date: new Date() }))
+		const objId = { location: 'London', date: new Date().toISOString() }
+		const result = schema.safeParse(createStringRecordId('temperature', objId))
 		expect(result.success).toBe(true)
+		if (result.success) {
+			console.log("result.data", result.data)
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('temperature')
+			expect(JSON.parse(result.data.id as string)).toEqual(objId)
+		}
 	})
 
-	test('Valid object-based StringRecordId', () => {
+	test('Valid object-based StringRecordId - transforms to RecordId', () => {
 		const schema = recordId()
-		const result = schema.safeParse(
-			createStringRecordId('temperature', { location: 'London', date: new Date().toISOString() }),
-		)
+		const objId = { location: 'London', date: new Date().toISOString() }
+		const result = schema.safeParse(createStringRecordId('temperature', objId))
 		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('temperature')
+			expect(result.data.id).toBe(JSON.stringify(objId))
+		}
+	})
+
+	test('Valid object with tb and id', () => {
+		const schema = recordId()
+		const result = schema.safeParse({ tb: 'internet', id: 9000 })
+		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe(9000)
+		}
+	})
+
+	test('Valid object with rid', () => {
+		const schema = recordId()
+		const result = schema.safeParse({ rid: "internet:9000" })
+		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe('9000')
+		}
 	})
 
 	test('Invalid record ID (not a valid string format)', () => {
@@ -109,21 +188,32 @@ describe('recordId type tests', () => {
 		const schema = recordId('internet')
 		const result = schema.safeParse(createRecordId('internet', 'test'))
 		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe('test')
+		}
 	})
 
-	test('Valid StringRecordId with specific table', () => {
+	test('Valid StringRecordId with specific table - transforms to RecordId', () => {
 		const schema = recordId('internet')
 		const result = schema.safeParse(createStringRecordId('internet', 'test'))
 		expect(result.success).toBe(true)
+		if (result.success) {
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe('test')
+		}
 	})
 
-	test('Valid string with specific table (transformed to StringRecordId)', () => {
+	test('Valid string with specific table - transforms to RecordId', () => {
 		const schema = recordId('internet')
 		const result = schema.safeParse('internet:test')
 		expect(result.success).toBe(true)
 		if (result.success) {
-			expect(result.data).toBeInstanceOf(StringRecordId)
-			expect((result.data as StringRecordId).rid).toBe('internet:test')
+			expect(result.data).toBeInstanceOf(RecordId)
+			expect(result.data.tb).toBe('internet')
+			expect(result.data.id).toBe('test')
 		}
 	})
 
