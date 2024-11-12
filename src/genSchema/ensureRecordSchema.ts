@@ -26,6 +26,9 @@ export function recordId<Table extends string = string>(table?: Table) {
                 : "Invalid record ID format. Must be 'table:id'"
         }),
         z.object({
+            rid: z.string().regex(fullRegex)
+        }),
+        z.object({
             tb: z.string(),
             id: z.union([z.string(), z.number(), z.record(z.unknown())])
         }).refine((val) => !table || val.tb === table, {
@@ -37,13 +40,20 @@ export function recordId<Table extends string = string>(table?: Table) {
         }
         if (val instanceof StringRecordId) {
             const [tb!, id!] = val.rid.split(':');
+            if (!tb || !id) throw new Error('Invalid StringRecordId format');
             return new RecordId(tb, id) as RecordId<Table>;
         }
         if (typeof val === 'string') {
             const [tb!, id!] = val.split(':');
+            if (!tb || !id) throw new Error('Invalid record ID string format');
             return new RecordId(tb, id) as RecordId<Table>;
         }
-        if (typeof val === 'object' && val !== null && 'tb' in val && 'id' in val) {
+        if ('rid' in val) {
+            const [tb, id] = val.rid.split(':');
+            if (!tb || !id) throw new Error('Invalid rid object format');
+            return new RecordId(tb, id) as RecordId<Table>;
+        }
+        if ('tb' in val && 'id' in val) {
             return new RecordId(val.tb, val.id) as RecordId<Table>;
         }
         throw new Error('Invalid input for RecordId');
