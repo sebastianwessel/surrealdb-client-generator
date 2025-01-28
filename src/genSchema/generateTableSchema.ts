@@ -102,14 +102,14 @@ import { recordId } from "../../_generated/recordSchema.js";
 
 // payload schema for creating a new ${name} entity
 export const ${tableName}CreateSchema = ${tableName}InputSchemaGen.merge(z.object({
-  id: recordId("${tableName}").optional()
+  id: recordId("${name}").optional()
   // add your custom fields here, which are not part of SurrealDB table schema
   // they are not overwritten by the next run
       }))
 
 // payload schema for fetching a ${name} entity
 export const ${tableName}Schema = ${tableName}OutputSchemaGen.merge(z.object({
-  id: recordId("${tableName}"),
+  id: recordId("${name}"),
   // add your custom fields here, which are not part of SurrealDB table schema
   // they are not overwritten by the next run
       }))
