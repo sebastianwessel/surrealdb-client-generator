@@ -24,6 +24,39 @@ export const tokenize = (definition: string): TokenizedDefinition => {
 		table: '',
 	}
 
+	const permissions: Permissions = {}
+	if (definition.match(/PERMISSIONS NONE/im)) {
+		permissions.none = true
+		definition = definition.replace(/\s*PERMISSIONS NONE.*$/im, '')
+	} else if (definition.match(/PERMISSIONS FULL/im)) {
+		permissions.full = true
+		const selectMatch = definition.match(/FOR select "([^"]+)"/im)
+		if (selectMatch) {
+			permissions.select = selectMatch[1]
+		}
+
+		const createMatch = definition.match(/FOR create "([^"]+)"/i)
+		if (createMatch) {
+			permissions.create = createMatch[1]
+		}
+
+		const updateMatch = definition.match(/FOR update "([^"]+)"/i)
+		if (updateMatch) {
+			permissions.update = updateMatch[1]
+		}
+
+		const deleteMatch = definition.match(/FOR delete "([^"]+)"/i)
+		if (deleteMatch) {
+			permissions.delete = deleteMatch[1]
+		}
+
+		definition = definition.replace(/\s*PERMISSIONS FULL.*$/im, '')
+	}
+
+	if (Object.keys(permissions).length > 0) {
+		result.permissions = permissions
+	}
+
 	const nameMatch = definition.match(/DEFINE FIELD(?: IF NOT EXISTS)? (.*) ON(?: TABLE)? (\w+)/im)
 	if (nameMatch) {
 		result.name = nameMatch[1] as string
@@ -65,35 +98,12 @@ export const tokenize = (definition: string): TokenizedDefinition => {
 		result.assert = assertMatch[1]
 	}
 
-	const permissions: Permissions = {}
-	if (definition.match(/PERMISSIONS NONE/im)) {
-		permissions.none = true
-	} else if (definition.match(/PERMISSIONS FULL/im)) {
-		permissions.full = true
-		const selectMatch = definition.match(/FOR select "([^"]+)"/im)
-		if (selectMatch) {
-			permissions.select = selectMatch[1]
-		}
-
-		const createMatch = definition.match(/FOR create "([^"]+)"/i)
-		if (createMatch) {
-			permissions.create = createMatch[1]
-		}
-
-		const updateMatch = definition.match(/FOR update "([^"]+)"/i)
-		if (updateMatch) {
-			permissions.update = updateMatch[1]
-		}
-
-		const deleteMatch = definition.match(/FOR delete "([^"]+)"/i)
-		if (deleteMatch) {
-			permissions.delete = deleteMatch[1]
-		}
-	}
-
 	if (Object.keys(permissions).length > 0) {
 		result.permissions = permissions
 	}
 
-	return result
+	return {
+		...result,
+		value: result?.value?.replace(/\s*PERMISSIONS\s+(NONE|FULL).*$/i, '').trim()
+	}
 }
