@@ -67,7 +67,8 @@ export function recordId<Table extends string = string>(table?: Table) {
 				return new RecordId(val.tb, val.id) as RecordId<Table>
 			}
 			throw new Error('Invalid input for RecordId')
-		})`
+		});
+  }`
 
 	await mkdirp(rootPath)
 
