@@ -13,7 +13,18 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const buildSchema = (fieldMap: { [key: string]: any }, fields: FieldDetail[]) => {
 		for (const field of fields) {
-			const parts = field.name.split('.').map(part => part.replace('[*]', ''))
+			const parts = field.name.split('.').map(originalPart => {
+				const part = originalPart.replace('[*]', '')
+
+				if (part.startsWith('`') && part.endsWith('`')) {
+					if (part.includes('-')) {
+						return part.replace(/`/g, '"')
+					}
+					return part.replace(/`/g, '')
+				}
+				return part
+			})
+
 			let current = fieldMap
 
 			// Todo - handle default values
