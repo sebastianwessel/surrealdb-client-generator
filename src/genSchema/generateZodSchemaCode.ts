@@ -10,7 +10,7 @@ const createRegex = (key: string) => {
 }
 
 export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string): string => {
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: ok here
 	const buildSchema = (fieldMap: { [key: string]: any }, fields: FieldDetail[]) => {
 		for (const field of fields) {
 			const parts = field.name.split('.').map(part => part.replace('[*]', ''))
@@ -41,7 +41,7 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 	}
 
 	const generateCode = (fieldMap: { [key: string]: unknown }, schemaName: string): string => {
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: ok here
 		const buildObject = (obj: { [key: string]: any }, parentKey = ''): string => {
 			const entries = Object.entries(obj).map(([key, value]) => {
 				const fullKey = parentKey ? `${parentKey}.${key}` : key
