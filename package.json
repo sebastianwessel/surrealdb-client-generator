@@ -1,7 +1,7 @@
 {
 	"name": "@sebastianwessel/surql-gen",
 	"private": false,
-	"version": "2.8.0",
+	"version": "2.8.1",
 	"engines": {
 		"node": ">=18"
 	},
@@ -43,7 +43,7 @@
 		"build": "node build.mjs",
 		"lint": "npx @biomejs/biome check --write .",
 		"test": "vitest --run",
-		"prepublishOnly": "npm run lint && vitest --no-watch && npm run build",
+		"prepublishOnly": "vitest --no-watch && npm run build",
 		"postpublish": "npx jsr publish"
 	},
 	"devDependencies": {
