@@ -1,5 +1,5 @@
 import { generateZodSchemaCode } from './generateZodSchemaCode.js'
-import { getDetailsFromDefinition } from './getDetailsFromDefinition.js'
+import { type FieldDetail, getDetailsFromDefinition } from './getDetailsFromDefinition.js'
 
 describe('generateZodSchemaCode', () => {
 	describe('basic schema', () => {
@@ -20,6 +20,51 @@ describe('generateZodSchemaCode', () => {
                     reviews: z.array(z.string()),
                     user: recordId('user'),
                     rating: z.number()
+                })
+            `)
+		})
+	})
+
+	describe('Backticked and special field name handling', () => {
+		it('strips backticks from simple field names', () => {
+			const fields: FieldDetail[] = [
+				{ name: '`type`', table: 'test', zodString: 'z.string()', skip: false },
+				{ name: '`value`', table: 'test', zodString: 'z.number()', skip: false },
+			]
+			const result = generateZodSchemaCode(fields, 'testSchema')
+			expect(result).toEqualIgnoringWhitespace(`
+                const testSchema = z.object({
+                    type: z.string(),
+                    value: z.number()
+                })
+            `)
+		})
+
+		it('strips backticks and quotes field names containing hyphens', () => {
+			const fields: FieldDetail[] = [
+				{ name: '`max-value`', table: 'test', zodString: 'z.number()', skip: false },
+				{ name: '`field-with-hyphen`', table: 'test', zodString: 'z.string()', skip: false },
+			]
+			const result = generateZodSchemaCode(fields, 'testSchema')
+			expect(result).toEqualIgnoringWhitespace(`
+                const testSchema = z.object({
+                    "max-value": z.number(),
+                    "field-with-hyphen": z.string()
+                })
+            `)
+		})
+
+		it('strips backticks from field names that are JavaScript reserved words and quotes them', () => {
+			const fields: FieldDetail[] = [
+				{ name: '`default`', table: 'test', zodString: 'z.string()', skip: false },
+				{ name: '`const`', table: 'test', zodString: 'z.number()', skip: false },
+			]
+			const result = generateZodSchemaCode(fields, 'testSchema')
+			// Assuming your sanitizeJSKey or equivalent quotes reserved words
+			expect(result).toEqualIgnoringWhitespace(`
+                const testSchema = z.object({
+                    default: z.string(),
+                    const: z.number()
                 })
             `)
 		})
