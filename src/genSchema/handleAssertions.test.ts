@@ -41,10 +41,15 @@ describe('handleAssertions', () => {
 			expect(handleAssertions('z.string()', 'string::len($value) = 8', 'string')).toBe('z.string().length(8)')
 		})
 
-		it('handles IN and INSIDE assertions', () => {
-			expect(handleAssertions('z.string()', "IN ['a', 'b', 'c']", 'string')).toBe("z.enum(['a', 'b', 'c'])")
-			expect(handleAssertions('z.string()', "INSIDE ['x', 'y', 'z']", 'string')).toBe("z.enum(['x', 'y', 'z'])")
-		})
+                it('handles IN and INSIDE assertions', () => {
+                        expect(handleAssertions('z.string()', "IN ['a', 'b', 'c']", 'string')).toBe("z.enum(['a', 'b', 'c'])")
+                        expect(handleAssertions('z.string()', "INSIDE ['x', 'y', 'z']", 'string')).toBe("z.enum(['x', 'y', 'z'])")
+                })
+
+                it('handles multiline IN assertions', () => {
+                        const multiline = "$value IN [\n'a', 'b', 'c' ]"
+                        expect(handleAssertions('z.string()', multiline, 'string')).toBe("z.enum(['a', 'b', 'c'])")
+                })
 
 		it('handles NOT IN and NOTINSIDE assertions', () => {
 			const expected = `
