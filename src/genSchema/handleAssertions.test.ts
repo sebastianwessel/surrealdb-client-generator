@@ -143,7 +143,7 @@ describe('handleAssertions', () => {
 			})
 
 			it('handles unknown schema types', () => {
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				// biome-ignore lint/suspicious/noExplicitAny: ok here
 				expect(handleAssertions('z.unknown()', 'some assertion', 'unknown' as any)).toBe('z.unknown()')
 			})
 

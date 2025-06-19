@@ -1,4 +1,4 @@
-import { type SchemaType, handleAssertions } from './handleAssertions.js'
+import { handleAssertions, type SchemaType } from './handleAssertions.js'
 import { type TokenizedDefinition, tokenize } from './tokenize.js'
 
 export type FieldDetail = TokenizedDefinition & { zodString: string; skip: boolean }
