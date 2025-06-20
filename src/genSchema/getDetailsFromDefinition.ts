@@ -3,6 +3,32 @@ import { type TokenizedDefinition, tokenize } from './tokenize.js'
 
 export type FieldDetail = TokenizedDefinition & { zodString: string; skip: boolean }
 
+const KNOWN_TYPES = [
+	'string',
+	'datetime',
+	'set',
+	'array',
+	'number',
+	'float',
+	'int',
+	'decimal',
+	'bool',
+	'object',
+	'record',
+	'duration',
+	'uuid',
+	'any',
+	'point',
+	'line',
+	'polygon',
+	'multipoint',
+	'multiline',
+	'multipolygon',
+	'collection',
+	'geometrycollection',
+	'geometry',
+] as const
+
 const typeRegex = /(?:option<)?(\w+)(?:<(\w+)(?:<(\w+)>)?>)?/i
 
 const getArrayType = (tokens: TokenizedDefinition, isInputSchema: boolean): string => {
@@ -137,6 +163,33 @@ export const getZodTypeFromQLType = (
 				let schema = `z.enum([${enumValues.map(v => `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`).join(', ')}])`
 				schema = makeOptional(schema, tokens, isInputSchema)
 				return schema
+			}
+		} else {
+			const parts = typeStringToProcess
+				.split('|')
+				.map(p => p.trim())
+				.filter(p => p)
+			if (parts.length > 1) {
+				const typeKeywordRegex = /^(?:option<)?([\w]+)(?:<[^>]+>)?$/i
+				const allTypes = parts.every(part => {
+					const match = part.match(typeKeywordRegex)
+					return match ? KNOWN_TYPES.includes(match[1].toLowerCase() as (typeof KNOWN_TYPES)[number]) : false
+				})
+				if (allTypes) {
+					const schemas = parts.map(part => {
+						const subTokens: TokenizedDefinition = { ...tokens, type: part }
+						return getZodTypeFromQLType(subTokens, isInputSchema)
+					})
+					let schema = `z.union([${schemas.join(', ')}])`
+					schema = makeOptional(schema, tokens, isInputSchema)
+					return schema
+				}
+
+				if (parts.every(p => /^[A-Za-z0-9_-]+$/.test(p))) {
+					let schema = `z.enum([${parts.map(v => `'${v}'`).join(', ')}])`
+					schema = makeOptional(schema, tokens, isInputSchema)
+					return schema
+				}
 			}
 		}
 	}
