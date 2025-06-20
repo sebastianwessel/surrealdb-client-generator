@@ -3,7 +3,7 @@ const FIELD_CLAUSES = ['TYPE', 'REFERENCE', 'DEFAULT', 'READONLY', 'VALUE', 'ASS
 const PATTERNS = {
 	CLAUSE_BOUNDARY: `\\s+(?:${FIELD_CLAUSES.join('|')})\\s+|$`,
 	CAPTURE_UNTIL_NEXT_CLAUSE: (keyword: string) =>
-		new RegExp(`${keyword}\\s+(.*?)(?=${`\\s+(?:${FIELD_CLAUSES.join('|')})\\s+|$`})`, 'is'),
+		new RegExp(`${keyword}\\s+(.*?)(?=${`\\s+(?:${FIELD_CLAUSES.join('|')})\\s+|$`})`, 'im'),
 	FOR_CLAUSE: /FOR\s+(select|create|update|delete)\s+([^FOR]*?)(?=\s+FOR\s+|$)/gim,
 	// biome-ignore lint/complexity/noUselessEscapeInRegex: prevent breaking changes
 	DEFINE_FIELD: /DEFINE FIELD(?: IF NOT EXISTS)?\s+(.*?)\s+ON(?: TABLE)?\s+([\w.:`\-\[\]*]+)/im,
