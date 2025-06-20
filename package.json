@@ -43,7 +43,7 @@
 		"build": "node build.mjs",
 		"lint": "npx @biomejs/biome check --write .",
 		"test": "vitest --run",
-		"prepublishOnly": "vitest --no-watch && npm run build",
+		"prepublishOnly": "npm run lint &&vitest --no-watch && npm run build",
 		"postpublish": "npx jsr publish"
 	},
 	"devDependencies": {
