@@ -81,24 +81,28 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 		}
 	}
 
-	if (condition.includes('NOT IN') || condition.includes('NOTINSIDE')) {
-		const match = condition.match(/(NOT IN|NOTINSIDE)\s*(\[.*?])/)
+       if (condition.includes('NOT IN') || condition.includes('NOTINSIDE')) {
+               const match = condition.match(/(NOT IN|NOTINSIDE)\s*(\[[\s\S]*?])/)
 		if (match?.[2]) {
 			const values = match[2].trim()
 			return `${schema}.refine((val) => !${values}.includes(val), {
             message: "String must not be one of ${values}",
         })`
 		}
-	} else if (condition.includes('INSIDE')) {
-		const match = condition.match(/INSIDE\s*(\[.*?])/)
-		if (match?.[1]) {
-			return `z.enum(${match[1].trim()})`
-		}
-	} else if (condition.includes('IN')) {
-		const match = condition.match(/\bIN\s*(\[.*?])/)
-		if (match?.[1]) {
-			return `z.enum(${match[1].trim()})`
-		}
+       } else if (condition.includes('INSIDE')) {
+               const match = condition.match(/INSIDE\s*(\[[\s\S]*?])/)
+               if (match?.[1]) {
+                       let values = match[1].replace(/\s+/g, ' ').trim()
+                       values = values.replace(/\[\s+/, '[').replace(/\s+\]/, ']')
+                       return `z.enum(${values})`
+               }
+       } else if (condition.includes('IN')) {
+               const match = condition.match(/\bIN\s*(\[[\s\S]*?])/)
+               if (match?.[1]) {
+                       let values = match[1].replace(/\s+/g, ' ').trim()
+                       values = values.replace(/\[\s+/, '[').replace(/\s+\]/, ']')
+                       return `z.enum(${values})`
+               }
 	}
 
 	const multiWordRegex = /^array::len\(string::words\(\$value\)\)\s*>\s*1$/
