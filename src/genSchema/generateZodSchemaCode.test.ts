@@ -256,5 +256,113 @@ describe('generateZodSchemaCode', () => {
                 })
             `)
 		})
+
+        // it('returns schema for double nested arrays', () => {
+        //     const definition = `
+        //         DEFINE FIELD responses ON TABLE survey TYPE array<object>;
+        //         DEFINE FIELD responses[*].answers ON TABLE survey TYPE array<object>;
+        //         DEFINE FIELD responses[*].answers[*].value ON TABLE survey TYPE string;
+        //     `
+        //     const fields = definition
+        //         .split(';')
+        //         .filter(x => x.trim().length)
+        //         .map(def => getDetailsFromDefinition(def, false))
+        //     const generatedSchema = generateZodSchemaCode(fields, 'schema')
+
+        //     expect(generatedSchema).toEqualIgnoringWhitespace(`
+        //         const schema = z.object({
+        //             responses: z.object({
+        //                 answers: z.object({
+        //                     value: z.string()
+        //                 }).array()
+        //             }).array()
+        //         })
+        //     `)
+        // })
+
+        
+        it('returns schema with record inside object array', () => {
+            const definition = `
+                DEFINE FIELD review ON TABLE product TYPE object;
+                DEFINE FIELD review.related_users ON TABLE product TYPE array<record<user>>;
+            `
+            const fields = definition
+                .split(';')
+                .filter(x => x.trim().length)
+                .map(def => getDetailsFromDefinition(def, false))
+            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+
+            expect(generatedSchema).toEqualIgnoringWhitespace(`
+                const schema = z.object({
+                    review: z.object({
+                        related_users: recordId('user').array()
+                    })
+                })
+            `)
+        })
+
+
+        it('returns schema for top-level object array containing a record', () => {
+            const definition = `
+                DEFINE FIELD responses ON TABLE survey TYPE array<object>;
+                DEFINE FIELD responses[*].user ON TABLE survey TYPE record<user>;
+            `
+            const fields = definition
+                .split(';')
+                .filter(x => x.trim().length)
+                .map(def => getDetailsFromDefinition(def, false))
+            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+
+            expect(generatedSchema).toEqualIgnoringWhitespace(`
+                const schema = z.object({
+                    responses: z.object({
+                        user: recordId('user')
+                    }).array()
+                })
+            `)
+        })
+
+        // it('handles nested arrays of objects with primitive values', () => {
+        //     const definition = `
+        //         DEFINE FIELD responses ON TABLE survey TYPE array<object>;
+        //         DEFINE FIELD responses[*].answers ON TABLE survey TYPE array<object>;
+        //         DEFINE FIELD responses[*].answers[*].value ON TABLE survey TYPE string;
+        //     `
+        //     const fields = definition
+        //         .split(';')
+        //         .filter(x => x.trim().length)
+        //         .map(def => getDetailsFromDefinition(def, false))
+        //     const generatedSchema = generateZodSchemaCode(fields, 'schema')
+
+        //     expect(generatedSchema).toEqualIgnoringWhitespace(`
+        //         const schema = z.object({
+        //             responses: z.object({
+        //                 answers: z.object({
+        //                     value: z.string()
+        //                 }).array()
+        //             }).array()
+        //         })
+        //     `)
+        // })
+
+
+        it('handles array of records correctly', () => {
+            const definition = `
+                DEFINE FIELD collaborators ON TABLE project TYPE array<record<user>>;
+            `
+            const fields = definition
+                .split(';')
+                .filter(x => x.trim().length)
+                .map(def => getDetailsFromDefinition(def, false))
+            const generatedSchema = generateZodSchemaCode(fields, 'schema')
+
+            expect(generatedSchema).toEqualIgnoringWhitespace(`
+                const schema = z.object({
+                    collaborators: recordId('user').array()
+                })
+            `)
+        })
+
+
 	})
 })

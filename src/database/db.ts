@@ -76,6 +76,8 @@ export const connectDb = async (config: Config, createInstance = false) => {
 	await db.signin({
 		username: config.username,
 		password: config.password,
+		namespace: config.ns,
+		database: config.db,
 	})
 	console.log('Connected to database successfully')
 }
