@@ -1,4 +1,4 @@
-import { toCamelCase } from './toCamelCase.js'
+import { toCamelCase } from './toCamelCase'
 
 export const toUpperCamelCase = (str: string): string => {
 	const s = toCamelCase(str)

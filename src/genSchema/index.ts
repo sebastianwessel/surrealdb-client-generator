@@ -1,1 +1,1 @@
-export * from './generateTableSchema.js'
+export * from './generateTableSchema'

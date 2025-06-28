@@ -3,20 +3,20 @@ import { resolve } from 'node:path'
 
 import { mkdirp } from 'mkdirp'
 
-import { toCamelCase } from '../helper/toCamelCase.js'
-import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
-import { getAllEntityFileContent } from './getAllEntityFileContent.js'
-import { getByIdEntityFileContent } from './getByIdEntityFileContent.js'
-import { getCreateEntityFileContent } from './getCreateEntityFileContent.js'
-import { getDeleteEntityFileContent } from './getDeleteEntityFileContent.js'
-import { getRepositoryContent } from './getRepositoryFileContent.js'
-import { getUpdateEntityFileContent } from './getUpdateEntityFileContent.js'
+import { toCamelCase } from '../helper/toCamelCase'
+import { toUpperCamelCase } from '../helper/toUpperCamelCase'
+import { getAllEntityFileContent } from './getAllEntityFileContent'
+import { getByIdEntityFileContent } from './getByIdEntityFileContent'
+import { getCreateEntityFileContent } from './getCreateEntityFileContent'
+import { getDeleteEntityFileContent } from './getDeleteEntityFileContent'
+import { getRepositoryContent } from './getRepositoryFileContent'
+import { getUpdateEntityFileContent } from './getUpdateEntityFileContent'
 
 const createIndexFile = (directory: string, files: string[]) => {
 	const indexContent = files
 		.map(file => {
 			const baseName = file.replace(/\.ts$/, '')
-			return `export * from './${baseName}.js';`
+			return `export * from './${baseName}';`
 		})
 		.join('\n')
 
@@ -93,7 +93,7 @@ export const generateClientJs = async (outputFolder: string, tableNames: string[
 		generatedFiles.push(tableName)
 	}
 
-	const mainIndexContent = generatedFiles.map(name => `export * from './${name}/index.js';`).join('\n')
+	const mainIndexContent = generatedFiles.map(name => `export * from './${name}/index';`).join('\n')
 	writeFileSync(resolve(clientFolder, 'index.ts'), mainIndexContent)
 	console.log(' ✅ Created/Updated main client index.ts')
 }

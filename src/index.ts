@@ -4,12 +4,12 @@ import { resolve } from 'node:path'
 
 import { program } from 'commander'
 
-import { configFileSchema } from './config/configFileSchema.js'
-import { closeDb, connectDb, insertDefinitions } from './database/db.js'
-import { getAllTableInfo } from './database/getAllTableInfo.js'
-import { generateClientJs } from './genClient/generateClientJs.js'
-import { generateTableSchema } from './genSchema/generateTableSchema.js'
-import { printSorry } from './helper/printSorry.js'
+import { configFileSchema } from './config/configFileSchema'
+import { closeDb, connectDb, insertDefinitions } from './database/db'
+import { getAllTableInfo } from './database/getAllTableInfo'
+import { generateClientJs } from './genClient/generateClientJs'
+import { generateTableSchema } from './genSchema/generateTableSchema'
+import { printSorry } from './helper/printSorry'
 
 const main = async () => {
 	program

@@ -1,4 +1,4 @@
-import { handleAssertions } from './handleAssertions.js'
+import { handleAssertions } from './handleAssertions'
 
 describe('handleAssertions', () => {
 	describe('String assertions', () => {
@@ -143,7 +143,7 @@ describe('handleAssertions', () => {
 			})
 
 			it('handles unknown schema types', () => {
-				// biome-ignore lint/suspicious/noExplicitAny: ok here
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 				expect(handleAssertions('z.unknown()', 'some assertion', 'unknown' as any)).toBe('z.unknown()')
 			})
 

@@ -1,8 +1,8 @@
 {
 	"$schema": "https://jsr.io/schema/config-file.v1.json",
-	"name": "@tz-torchai/surql-gen",
+	"name": "@sebastianwessel/surql-gen",
 	"description": "A small tool which generates a typescript client for SurrealDB based on the schema of a given database",
-	"version": "2.8.2",
+	"version": "2.7.2",
 	"exports": "./dist/index.js",
 	"publish": {
 		"include": ["dist/**/*.js", "dist/**/*.d.ts", "README.md", "package.json"],

@@ -4,11 +4,11 @@ import { resolve } from 'node:path'
 import { mkdirp } from 'mkdirp'
 import { rimraf } from 'rimraf'
 
-import { getTableInfo } from '../database/getTableInfo.js'
-import { toCamelCase } from '../helper/toCamelCase.js'
-import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
-import { ensureRecordSchema } from './ensureRecordSchema.js'
-import { mergeNested } from './mergeNested.js'
+import { getTableInfo } from '../database/getTableInfo'
+import { toCamelCase } from '../helper/toCamelCase'
+import { toUpperCamelCase } from '../helper/toUpperCamelCase'
+import { ensureRecordSchema } from './ensureRecordSchema'
+import { mergeNested } from './mergeNested'
 
 export const generateSchemaForTable = async (name: string, tableInfo: string) => {
 	const isSchemaFull = !!tableInfo?.toUpperCase().includes('SCHEMAFULL')
@@ -33,7 +33,7 @@ const createIndexFile = async (directory: string, files: string[]): Promise<void
 	const indexContent = files
 		.map(file => {
 			const baseName = file.replace(/\.ts$/, '')
-			return `export * from './${baseName}.js';`
+			return `export * from './${baseName}';`
 		})
 		.join('\n')
 
@@ -72,7 +72,7 @@ export const generateTableSchema = async (outFolder: string, tableInfo: Record<s
 // ====================
 
 import { z } from "zod";
-${injectRecordSchema ? 'import { recordId } from "../recordSchema.js"' : ''}
+${injectRecordSchema ? 'import { recordId } from "../recordSchema"' : ''}
 
 // the create schema for table ${name}
 export ${inputFields};
@@ -97,8 +97,8 @@ export ${outputFields};
 
 import { z } from "zod";
 
-import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated/index.js";
-import { recordId } from "../../_generated/recordSchema.js";
+import { ${tableName}InputSchemaGen, ${tableName}OutputSchemaGen } from "../../_generated/index";
+import { recordId } from "../../_generated/recordSchema";
 
 // payload schema for creating a new ${name} entity
 export const ${tableName}CreateSchema = ${tableName}InputSchemaGen.merge(z.object({
@@ -129,7 +129,7 @@ export const ${tableName}Schema = ${tableName}OutputSchemaGen.merge(z.object({
 import { z } from "zod";
 import { type RecordId} from "surrealdb";
 
-import { ${tableName}CreateSchema, ${tableName}Schema } from "./${tableName}Schema.js";
+import { ${tableName}CreateSchema, ${tableName}Schema } from "./${tableName}Schema";
 
 // the create type for table ${name}
 export type ${toUpperCamelCase(tableName)}Create = z.input<typeof ${tableName}CreateSchema>
@@ -155,7 +155,7 @@ export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema>
 		const mainSchemaFolder = resolve(outFolder, 'schema')
 		const mainIndexFileName = resolve(mainSchemaFolder, 'index.ts')
 		const mainIndexContent = Object.keys(tableInfo)
-			.map(name => `export * from './${toCamelCase(name)}/index.js';`)
+			.map(name => `export * from './${toCamelCase(name)}/index';`)
 			.join('\n')
 		await fs.writeFile(mainIndexFileName, mainIndexContent)
 		console.log(' ✅ Created/Updated main schema index.ts')

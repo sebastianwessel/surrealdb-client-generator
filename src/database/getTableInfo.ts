@@ -1,4 +1,4 @@
-import { getDb } from './db.js'
+import { getDb } from './db'
 
 type InfoTable = {
 	events: Record<string, unknown>
@@ -13,7 +13,7 @@ export const getTableInfo = async (tableName: string) => {
 
 	const result = await db.query<InfoTable>(`INFO FOR TABLE ${tableName};`, {})
 
-	console.log(result[0])
+	// console.log(result[0])
 
 	return {
 		fields: result[0]?.fields ?? {},
