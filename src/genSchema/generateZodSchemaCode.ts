@@ -4,24 +4,13 @@ const escapeRegExp = (string: string) => {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-
-
 const createRegex = (key: string) => {
 	const escapedKey = escapeRegExp(key)
 	return new RegExp(`(?<!${escapedKey})\\[\\*\\]`, 'g')
 }
 
 export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string): string => {
-
-	const isArrayAtKey = (key: string) => {
-	return fields.some(f => {
-		// Check if the field name equals key + [*] or starts with key + [*].
-		return f.name === `${key}[*]` || f.name.startsWith(`${key}[*].`)
-	})
-	}
-
-
-	// biome-ignore lint/suspicious/noExplicitAny: dynamic field structure required for recursive schema generation
+	// biome-ignore lint/suspicious/noExplicitAny: ok here
 	const buildSchema = (fieldMap: { [key: string]: any }, fields: FieldDetail[]) => {
 		for (const field of fields) {
 			const parts = field.name.split('.').map(originalPart => {
@@ -63,54 +52,48 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 	}
 
 	const generateCode = (fieldMap: { [key: string]: unknown }, schemaName: string): string => {
-		// biome-ignore lint/suspicious/noExplicitAny: dynamic field structure required for recursive schema generation
+		// biome-ignore lint/suspicious/noExplicitAny: ok here
+		const buildObject = (obj: { [key: string]: any }, parentKey = ''): string => {
+			const entries = Object.entries(obj).map(([key, value]) => {
+				const fullKey = parentKey ? `${parentKey}.${key}` : key
+				
+				// Fixed array detection logic
+				const isArray = fields.some(f => {
+					// Check if the original field name (before processing) contains [*] at this exact position
+					const expectedArrayPattern = `${fullKey}[*]`
+					return f.name === expectedArrayPattern || f.name.startsWith(`${expectedArrayPattern}.`)
+				})
 
+				if (typeof value === 'string') {
+					return `${key}: ${value}${isArray ? '.array()' : ''}`
+				}
+				const innerObject = buildObject(value, fullKey)
+				let objectSchema = `z.object({\n${innerObject}\n  })`
 
-const buildObject = (obj: { [key: string]: any }, parentKey = '', parentIsArray = false): string => {
-  const entries = Object.entries(obj).map(([key, value]) => {
-	const currentKey = key
-	const fullKey = parentKey
-	? `${parentKey}${parentIsArray ? '[*]' : ''}.${currentKey}`
-	: currentKey
+				const allOptional = Object.values(value).every(
+					v => typeof v === 'string' && (v.includes('.optional()') || v.endsWith('.passthrough()')),
+				)
 
-    // Check if this field is an array level
-    const currentIsArray = fields.some(f => f.name === `${fullKey}[*]` || f.name.startsWith(`${fullKey}[*].`))
+				const fieldSchema = fields.find(f => f.name === fullKey)
+				const isOptionalFromSchema = fieldSchema?.zodString.includes('.optional()')
 
-    if (typeof value === 'string') {
-      return `${key}: ${value}${currentIsArray ? '.array()' : ''}`
-    }
+				if (isArray) {
+					objectSchema += '.array()'
+				}
 
-    // Recurse with currentIsArray as flag for child
-    const innerObject = buildObject(value, fullKey, currentIsArray)
+				if (allOptional || isOptionalFromSchema) {
+					objectSchema += '.optional()'
+				}
 
-    let objectSchema = `z.object({\n${innerObject}\n  })`
-
-    // Add .array() if current key is an array
-    if (currentIsArray) {
-      objectSchema += '.array()'
-    }
-
-    // Optional check (optional but keep)
-    const allOptional = Object.values(value).every(
-      v => typeof v === 'string' && (v.includes('.optional()') || v.endsWith('.passthrough()'))
-    )
-    const fieldSchema = fields.find(f => f.name === fullKey)
-    const isOptionalFromSchema = fieldSchema?.zodString.includes('.optional()')
-
-    if (allOptional || isOptionalFromSchema) {
-      objectSchema += '.optional()'
-    }
-
-    return `${key}: ${objectSchema}`
-  })
-  return entries.join(',\n  ')
-}
-
-
+				return `${key}: ${objectSchema}`
+			})
+			return entries.join(',\n  ')
+		}
 
 		const schema = `z.object({\n${buildObject(fieldMap)}\n})`
 		return `const ${schemaName} = ${schema}`
 	}
+
 	const fieldMap: { [key: string]: unknown } = {}
 	buildSchema(fieldMap, fields)
 	return generateCode(fieldMap, schemaName)

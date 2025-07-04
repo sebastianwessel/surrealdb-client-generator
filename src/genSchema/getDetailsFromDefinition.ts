@@ -69,7 +69,7 @@ const getSchemaForType = (type: string, tokens: TokenizedDefinition, isInputSche
 		case 'string':
 			return 'z.string()'
 		case 'datetime':
-			return 'z.string().datetime()'
+			return 'z.coerce.date()'
 		case 'set':
 			return 'z.array(z.unknown())'
 		case 'array':
