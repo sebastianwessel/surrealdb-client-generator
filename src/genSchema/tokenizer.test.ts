@@ -1,5 +1,5 @@
-import { getZodTypeFromQLType } from './getDetailsFromDefinition'
-import { tokenize } from './tokenize'
+import { getZodTypeFromQLType } from './getDetailsFromDefinition.js'
+import { tokenize } from './tokenize.js'
 
 describe('Field schema generation', () => {
 	describe('number', () => {

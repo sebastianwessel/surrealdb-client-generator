@@ -1,2 +1,2 @@
-export * from './configFileSchema'
-export * from './types'
+export * from './configFileSchema.js'
+export * from './types.js'

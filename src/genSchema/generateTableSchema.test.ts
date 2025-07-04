@@ -1,6 +1,6 @@
-import { generateSchemaForTable } from './generateTableSchema'
+import { generateSchemaForTable } from './generateTableSchema.js'
 
-vi.mock('../database/getTableInfo', () => ({
+vi.mock('../database/getTableInfo.js', () => ({
 	getTableInfo: vi.fn().mockResolvedValue({
 		fields: { name: 'DEFINE FIELD name ON command TYPE string PERMISSIONS FULL' },
 	}),

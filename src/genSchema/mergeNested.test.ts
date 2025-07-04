@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeNested } from './mergeNested'
+import { mergeNested } from './mergeNested.js'
 
 describe('mergeNested', () => {
 	it('correctly processes simple fields', () => {

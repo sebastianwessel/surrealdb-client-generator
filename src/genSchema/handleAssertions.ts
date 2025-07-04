@@ -30,7 +30,7 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 			case 'ascii':
 				return `${schema}.regex(/^[\x00-\x7F]*$/)`
 			case 'datetime':
-				return `z.coerce.date()`
+				return `${schema}.datetime()`
 			case 'url':
 				return `${schema}.url()`
 			case 'email':

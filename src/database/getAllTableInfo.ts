@@ -1,4 +1,4 @@
-import { getDb } from './db'
+import { getDb } from './db.js'
 
 export const getAllTableInfo = async () => {
 	const db = getDb()

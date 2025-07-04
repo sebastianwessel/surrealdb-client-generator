@@ -73,7 +73,8 @@ export function recordId<Table extends string = string>(table?: Table) {
 	await mkdirp(rootPath)
 
 	const fileName = join(rootPath, 'recordSchema.ts')
-	
+
+	console.log(fileName)
 	if (!existsSync(fileName)) {
 		writeFileSync(fileName, content, { flag: 'wx' })
 	}

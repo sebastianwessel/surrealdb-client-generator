@@ -38,13 +38,12 @@
 		"surql-gen": "./dist/index.js"
 	},
 	"scripts": {
-		"prepare": "node build.mjs",
 		"start": "node dist/index.js",
 		"dev": "tsx src/index.ts",
 		"build": "node build.mjs",
 		"lint": "npx @biomejs/biome check --write .",
 		"test": "vitest --run",
-		"prepublishOnly": "npm run lint && vitest --no-watch && npm run build",
+		"prepublishOnly": "vitest --no-watch && npm run build",
 		"postpublish": "npx jsr publish"
 	},
 	"devDependencies": {

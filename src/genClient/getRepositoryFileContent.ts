@@ -2,11 +2,11 @@ export const getRepositoryContent = (lib: string, entityName: string) => {
 	return `
 import type { Surreal } from "${lib}"
 
-import { create${entityName} } from "./create${entityName}"
-import { getAll${entityName}s } from "./getAll${entityName}s"
-import { get${entityName}ById } from "./get${entityName}ById"
-import { update${entityName} } from "./update${entityName}"
-import { delete${entityName} } from "./delete${entityName}"
+import { create${entityName} } from "./create${entityName}.js"
+import { getAll${entityName}s } from "./getAll${entityName}s.js"
+import { get${entityName}ById } from "./get${entityName}ById.js"
+import { update${entityName} } from "./update${entityName}.js"
+import { delete${entityName} } from "./delete${entityName}.js"
 
 export const get${entityName}Repository = (db: Surreal) => {
   return {

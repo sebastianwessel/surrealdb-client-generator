@@ -1,4 +1,4 @@
-import { toUpperCamelCase } from '../helper/toUpperCamelCase'
+import { toUpperCamelCase } from '../helper/toUpperCamelCase.js'
 
 export const getDeleteEntityFileContent = (lib: string, entityName: string) => {
 	const entityNameFirstUpper = `${toUpperCamelCase(entityName)}`
@@ -7,7 +7,7 @@ export const getDeleteEntityFileContent = (lib: string, entityName: string) => {
 	return `
 import { type Surreal, RecordId } from "${lib}";
 
-import type { ${entityTypeName} } from "../../schema/${entityName}/${entityName}Types";
+import type { ${entityTypeName} } from "../../schema/${entityName}/${entityName}Types.js";
 
 export const delete${entityNameFirstUpper} = async function (db: Surreal, id: RecordId) {
   return db.delete<${entityTypeName}>(id)
