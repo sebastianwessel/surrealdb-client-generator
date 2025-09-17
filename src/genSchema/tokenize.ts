@@ -5,7 +5,7 @@ const PATTERNS = {
 	CAPTURE_UNTIL_NEXT_CLAUSE: (keyword: string) =>
 		new RegExp(`${keyword}\\s+(.*?)(?=${`\\s+(?:${FIELD_CLAUSES.join('|')})\\s+|$`})`, 'im'),
 	FOR_CLAUSE: /FOR\s+(select|create|update|delete)\s+([^FOR]*?)(?=\s+FOR\s+|$)/gim,
-	DEFINE_FIELD: /DEFINE FIELD(?: IF NOT EXISTS)?\s+(.*?)\s+ON(?: TABLE)?\s+([\w.:`\-\[\]*]+)/im,
+	DEFINE_FIELD: /DEFINE FIELD(?: IF NOT EXISTS)?\s+((?:`[^`]+`|[^`])+?)\s+ON(?: TABLE)?\s+([\w.:`\-\[\]*]+)/im,
 } as const
 
 type PermissionOperation = 'select' | 'create' | 'update' | 'delete'
@@ -91,10 +91,16 @@ export const tokenize = (originalDefinition: string): TokenizedDefinition => {
 	let remainingDefinitionAfterNameAndTable = definition
 
 	if (nameMatch) {
-		result.name = nameMatch[1] ? nameMatch[1].trim() : ''
+		let fieldName = nameMatch[1] ? nameMatch[1].trim() : ''
+
+		const stripBackticks = (str: string): string => {
+			return str.replace(/`([^`]+)`/g, '$1')
+		}
+
+		result.name = stripBackticks(fieldName)
 		result.table = nameMatch[2] ? nameMatch[2].trim() : ''
 		const defineFieldPartRegex = new RegExp(
-			`^DEFINE FIELD(?: IF NOT EXISTS)?\\s+${result.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+ON(?: TABLE)?\\s+${result.table.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`,
+			`^DEFINE FIELD(?: IF NOT EXISTS)?\\s+${fieldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+ON(?: TABLE)?\\s+${result.table.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`,
 			'i',
 		)
 		remainingDefinitionAfterNameAndTable = definition.replace(defineFieldPartRegex, '').trim()
