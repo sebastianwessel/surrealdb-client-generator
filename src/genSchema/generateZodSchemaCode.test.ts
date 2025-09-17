@@ -249,7 +249,7 @@ describe('generateZodSchemaCode', () => {
                         author: z.object({
                             name: z.string(),
                             email: z.string(),
-                            tags: z.string().array(),
+                            tags: z.array(z.string()),
                             user: recordId('user')
                         })
                     })
