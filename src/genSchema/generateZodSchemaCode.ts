@@ -17,15 +17,18 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 				continue
 			}
 
-			const parts = field.name.split('.').map(originalPart => {
-				const part = originalPart.replace('[*]', '')
+			const parts = field.name
+				.split('.')
+				.map(originalPart => {
+					const part = originalPart.replace('[*]', '')
 
-				// Strip backticks if present
-				if (part.startsWith('`') && part.endsWith('`')) {
-					return part.replace(/`/g, '')
-				}
-				return part
-			}).filter(part => part.length > 0)
+					// Strip backticks if present
+					if (part.startsWith('`') && part.endsWith('`')) {
+						return part.replace(/`/g, '')
+					}
+					return part
+				})
+				.filter(part => part.length > 0)
 
 			// Skip if we have no parts left after filtering (e.g., field was just "[*]")
 			if (parts.length === 0) {

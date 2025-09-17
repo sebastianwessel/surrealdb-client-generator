@@ -1,6 +1,5 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {
@@ -18,20 +17,21 @@
 				"noUselessElse": "error"
 			}
 		},
-		"includes": [
-			"**",
-			"!**/dist/**",
-			"!**/node_modules/**",
-			"!**/.tshy/**",
-			"!**/.tshy-build/**",
-			"!out/**",
-			"!client_generated/**",
-			"!**/package-lock.json",
-			"!src/vitest.d.ts"
+		"include": ["**/*.ts", "**/*.js", "**/*.json", "**/*.mjs"],
+		"ignore": [
+			"**/dist/**",
+			"**/node_modules/**",
+			"**/.tshy/**",
+			"**/.tshy-build/**",
+			"out/**",
+			"client_generated/**",
+			"**/package-lock.json",
+			"src/vitest.d.ts"
 		]
 	},
 	"formatter": {
-		"includes": ["**", "!**/dist/**", "!**/node_modules/**", "!**/.tshy/**", "!out/**"],
+		"include": ["**/*.ts", "**/*.js", "**/*.json", "**/*.mjs"],
+		"ignore": ["**/dist/**", "**/node_modules/**", "**/.tshy/**", "out/**"],
 		"enabled": true,
 		"formatWithErrors": false,
 		"indentStyle": "tab",

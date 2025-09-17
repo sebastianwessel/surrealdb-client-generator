@@ -1,14 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { getDetailsFromDefinition } from './getDetailsFromDefinition.js'
 import { generateZodSchemaCode } from './generateZodSchemaCode.js'
+import { getDetailsFromDefinition } from './getDetailsFromDefinition.js'
 
 describe('Comprehensive Field Definition Tests', () => {
 	describe('Array with defaults', () => {
 		it('should handle array with empty array default', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD tags ON TABLE post TYPE array<string> DEFAULT [];',
-				true
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD tags ON TABLE post TYPE array<string> DEFAULT [];', true)
 			expect(result.zodString).toBe('z.array(z.string()).optional()')
 			expect(result.default).toBe('[]')
 		})
@@ -16,7 +13,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle array with default values', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD roles ON TABLE user TYPE array<string> DEFAULT ["user"];',
-				true
+				true,
 			)
 			expect(result.zodString).toBe('z.array(z.string()).optional()')
 			expect(result.default).toBe('["user"]')
@@ -25,7 +22,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle optional array with default', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD tags ON TABLE post TYPE option<array<string>> DEFAULT [];',
-				true
+				true,
 			)
 			expect(result.zodString).toBe('z.array(z.string()).optional()')
 		})
@@ -33,7 +30,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle array of objects with default', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD metadata ON TABLE user TYPE array<object> DEFAULT [];',
-				true
+				true,
 			)
 			expect(result.zodString).toBe('z.array(z.object({})).optional()')
 		})
@@ -41,7 +38,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle DEFAULT ALWAYS for arrays', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD tags ON TABLE post TYPE array<object> DEFAULT ALWAYS [];',
-				true
+				true,
 			)
 			expect(result.zodString).toBe('z.array(z.object({})).optional()')
 		})
@@ -49,43 +46,28 @@ describe('Comprehensive Field Definition Tests', () => {
 
 	describe('Field name sanitization and special characters', () => {
 		it('should handle field names with backticks', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD `value` ON TABLE data TYPE any;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD `value` ON TABLE data TYPE any;', false)
 			expect(result.name).toBe('value')
 			expect(result.zodString).toBe('z.any()')
 		})
 
 		it('should handle field names with special characters', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD `user-id` ON TABLE users TYPE string;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD `user-id` ON TABLE users TYPE string;', false)
 			expect(result.name).toBe('user-id')
 		})
 
 		it('should handle nested fields with backticks', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD `data`.`sub-field` ON TABLE records TYPE string;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD `data`.`sub-field` ON TABLE records TYPE string;', false)
 			expect(result.name).toBe('data.sub-field')
 		})
 
 		it('should handle reserved keywords as field names', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD `class` ON TABLE items TYPE string;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD `class` ON TABLE items TYPE string;', false)
 			expect(result.name).toBe('class')
 		})
 
 		it('should handle field names with spaces', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD `full name` ON TABLE users TYPE string;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD `full name` ON TABLE users TYPE string;', false)
 			expect(result.name).toBe('full name')
 		})
 
@@ -93,7 +75,7 @@ describe('Comprehensive Field Definition Tests', () => {
 			const fields = [
 				getDetailsFromDefinition('DEFINE FIELD `user-id` ON TABLE data TYPE string;', false),
 				getDetailsFromDefinition('DEFINE FIELD `full name` ON TABLE data TYPE string;', false),
-				getDetailsFromDefinition('DEFINE FIELD `123abc` ON TABLE data TYPE string;', false)
+				getDetailsFromDefinition('DEFINE FIELD `123abc` ON TABLE data TYPE string;', false),
 			]
 			const schema = generateZodSchemaCode(fields, 'dataSchema')
 
@@ -105,58 +87,40 @@ describe('Comprehensive Field Definition Tests', () => {
 
 	describe('Complex type definitions', () => {
 		it('should handle union types', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD user_id ON TABLE user TYPE uuid | int;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD user_id ON TABLE user TYPE uuid | int;', false)
 			expect(result.zodString).toBe('z.union([z.string().uuid(), z.number()])')
 		})
 
 		it('should handle literal types', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD status ON TABLE order TYPE "pending" | "processing" | "completed";',
-				false
+				false,
 			)
 			expect(result.zodString).toBe("z.enum(['pending', 'processing', 'completed'])")
 		})
 
 		it('should handle set type', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD tags ON TABLE post TYPE set<string>;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD tags ON TABLE post TYPE set<string>;', false)
 			expect(result.zodString).toBe('z.array(z.string())')
 		})
 
 		it('should handle set with size constraint', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD tags ON TABLE post TYPE set<string, 10>;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD tags ON TABLE post TYPE set<string, 10>;', false)
 			expect(result.zodString).toContain('z.array(z.string())')
 		})
 
 		it('should handle decimal type', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD price ON TABLE product TYPE decimal;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD price ON TABLE product TYPE decimal;', false)
 			expect(result.zodString).toBe('z.number()')
 		})
 
 		it('should handle bytes type', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD data ON TABLE files TYPE bytes;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD data ON TABLE files TYPE bytes;', false)
 			expect(result.zodString).toBe('z.instanceof(Uint8Array)')
 		})
 
 		it('should handle range type', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD age ON TABLE user TYPE range<18..120>;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD age ON TABLE user TYPE range<18..120>;', false)
 			expect(result.zodString).toContain('z.number().min(18).max(120)')
 		})
 	})
@@ -165,17 +129,14 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should make fields with VALUE optional in input schemas', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD email ON TABLE user TYPE string VALUE string::lowercase($value);',
-				true
+				true,
 			)
 			expect(result.skip).toBe(false)
 			expect(result.zodString).toBe('z.string().optional()')
 		})
 
 		it('should handle VALUE with time::now()', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD updated ON TABLE user VALUE time::now();',
-				true
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD updated ON TABLE user VALUE time::now();', true)
 			expect(result.skip).toBe(false)
 			expect(result.zodString).toBe('z.any().optional()')
 		})
@@ -183,7 +144,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should make READONLY VALUE fields optional in input schemas', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD created_at ON TABLE user TYPE datetime READONLY VALUE time::now();',
-				true
+				true,
 			)
 			expect(result.zodString).toBe('z.string().datetime().optional()')
 		})
@@ -191,7 +152,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle VALUE with default fallback in input schemas', () => {
 			const result = getDetailsFromDefinition(
 				"DEFINE FIELD created_by ON TABLE user TYPE record<user> VALUE $before OR type::thing('user', $auth.id);",
-				true
+				true,
 			)
 			expect(result.zodString).toBe("recordId('user').optional()")
 		})
@@ -201,7 +162,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle ASSERT with ALLINSIDE for arrays', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD permissions ON TABLE acl TYPE array<string> ASSERT $value ALLINSIDE ["create", "read", "write", "delete"];',
-				false
+				false,
 			)
 			expect(result.zodString).toContain('z.array')
 			expect(result.zodString).toContain('enum')
@@ -210,7 +171,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle ASSERT with custom validation', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD email ON TABLE user TYPE string ASSERT string::is_email($value);',
-				false
+				false,
 			)
 			expect(result.zodString).toContain('z.string()')
 			expect(result.assert).toContain('is_email')
@@ -219,7 +180,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle ASSERT with error messages', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD num ON TABLE data TYPE int ASSERT { IF $value % 2 = 0 { RETURN true } ELSE { THROW "Number must be even" } };',
-				false
+				false,
 			)
 			expect(result.zodString).toBe('z.number()')
 		})
@@ -229,15 +190,15 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should make array fields with DEFAULT optional in input schemas', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD images ON recipe TYPE option<array<record<asset>>> DEFAULT [] PERMISSIONS FULL',
-				true
+				true,
 			)
-			expect(result.zodString).toBe('recordId(\'asset\').array().optional()')
+			expect(result.zodString).toBe("recordId('asset').array().optional()")
 		})
 
 		it('should handle meta.created_at with VALUE clause', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD meta.created_at ON recipe TYPE datetime READONLY VALUE time::now() PERMISSIONS FULL',
-				true
+				true,
 			)
 			expect(result.zodString).toBe('z.string().datetime().optional()')
 		})
@@ -245,7 +206,7 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle fields with both DEFAULT and VALUE clauses', () => {
 			const result = getDetailsFromDefinition(
 				"DEFINE FIELD meta.created_by ON recipe TYPE option<record<user>> DEFAULT type::thing('user', $auth.id) VALUE $before OR type::thing('user', $auth.id) PERMISSIONS FULL",
-				true
+				true,
 			)
 			expect(result.zodString).toBe("recordId('user').optional()")
 		})
@@ -253,9 +214,9 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle option<array> types correctly', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD required_tiers ON recipe TYPE option<array<record<chef_subscription_tier>>> PERMISSIONS FULL',
-				true
+				true,
 			)
-			expect(result.zodString).toBe('recordId(\'chef_subscription_tier\').array().optional()')
+			expect(result.zodString).toBe("recordId('chef_subscription_tier').array().optional()")
 		})
 	})
 
@@ -283,31 +244,31 @@ describe('Comprehensive Field Definition Tests', () => {
 		it('should handle arrays with nested defaults', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD settings.notifications ON TABLE user TYPE array<object> DEFAULT [{ email: true, push: false }];',
-				true
+				true,
 			)
 			expect(result.zodString).toBe('z.array(z.object({})).optional()')
 		})
 
 		it('should handle FLEXIBLE fields without explicit type', () => {
-			const result = getDetailsFromDefinition(
-				'DEFINE FIELD metadata ON TABLE user FLEXIBLE;',
-				false
-			)
+			const result = getDetailsFromDefinition('DEFINE FIELD metadata ON TABLE user FLEXIBLE;', false)
 			expect(result.zodString).toBe('z.any()')
 		})
 
 		it('should handle geometry types', () => {
 			const geoTypes = [
-				'point', 'line', 'polygon', 'multipoint',
-				'multiline', 'multipolygon', 'collection',
-				'geometrycollection', 'geometry'
+				'point',
+				'line',
+				'polygon',
+				'multipoint',
+				'multiline',
+				'multipolygon',
+				'collection',
+				'geometrycollection',
+				'geometry',
 			]
 
 			for (const geoType of geoTypes) {
-				const result = getDetailsFromDefinition(
-					`DEFINE FIELD location ON TABLE places TYPE ${geoType};`,
-					false
-				)
+				const result = getDetailsFromDefinition(`DEFINE FIELD location ON TABLE places TYPE ${geoType};`, false)
 				expect(result.zodString).toBe('z.object({}).passthrough()')
 			}
 		})
@@ -316,48 +277,38 @@ describe('Comprehensive Field Definition Tests', () => {
 	describe('Default value generation in schemas', () => {
 		it('should add .default() to schema when DEFAULT is present for output schemas', () => {
 			const fields = [
-				getDetailsFromDefinition('DEFINE FIELD status ON TABLE order TYPE string DEFAULT "pending";', false)
+				getDetailsFromDefinition('DEFINE FIELD status ON TABLE order TYPE string DEFAULT "pending";', false),
 			]
 			const schema = generateZodSchemaCode(fields, 'orderSchema')
 			expect(schema).toContain('.default("pending")')
 		})
 
 		it('should handle numeric default values', () => {
-			const fields = [
-				getDetailsFromDefinition('DEFINE FIELD count ON TABLE stats TYPE number DEFAULT 0;', false)
-			]
+			const fields = [getDetailsFromDefinition('DEFINE FIELD count ON TABLE stats TYPE number DEFAULT 0;', false)]
 			const schema = generateZodSchemaCode(fields, 'statsSchema')
 			expect(schema).toContain('.default(0)')
 		})
 
 		it('should handle boolean default values', () => {
-			const fields = [
-				getDetailsFromDefinition('DEFINE FIELD active ON TABLE user TYPE bool DEFAULT true;', false)
-			]
+			const fields = [getDetailsFromDefinition('DEFINE FIELD active ON TABLE user TYPE bool DEFAULT true;', false)]
 			const schema = generateZodSchemaCode(fields, 'userSchema')
 			expect(schema).toContain('.default(true)')
 		})
 
 		it('should handle array default values', () => {
-			const fields = [
-				getDetailsFromDefinition('DEFINE FIELD tags ON TABLE post TYPE array<string> DEFAULT [];', false)
-			]
+			const fields = [getDetailsFromDefinition('DEFINE FIELD tags ON TABLE post TYPE array<string> DEFAULT [];', false)]
 			const schema = generateZodSchemaCode(fields, 'postSchema')
 			expect(schema).toContain('.default([])')
 		})
 
 		it('should handle object default values', () => {
-			const fields = [
-				getDetailsFromDefinition('DEFINE FIELD settings ON TABLE user TYPE object DEFAULT {};', false)
-			]
+			const fields = [getDetailsFromDefinition('DEFINE FIELD settings ON TABLE user TYPE object DEFAULT {};', false)]
 			const schema = generateZodSchemaCode(fields, 'userSchema')
 			expect(schema).toContain('.default({})')
 		})
 
 		it('should not add default to optional fields', () => {
-			const fields = [
-				getDetailsFromDefinition('DEFINE FIELD bio ON TABLE user TYPE string DEFAULT "No bio";', true)
-			]
+			const fields = [getDetailsFromDefinition('DEFINE FIELD bio ON TABLE user TYPE string DEFAULT "No bio";', true)]
 			const schema = generateZodSchemaCode(fields, 'userSchema')
 			expect(schema).not.toContain('.default(')
 			expect(schema).toContain('.optional()')

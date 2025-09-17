@@ -91,7 +91,7 @@ export const tokenize = (originalDefinition: string): TokenizedDefinition => {
 	let remainingDefinitionAfterNameAndTable = definition
 
 	if (nameMatch) {
-		let fieldName = nameMatch[1] ? nameMatch[1].trim() : ''
+		const fieldName = nameMatch[1] ? nameMatch[1].trim() : ''
 
 		const stripBackticks = (str: string): string => {
 			return str.replace(/`([^`]+)`/g, '$1')
