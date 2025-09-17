@@ -24,7 +24,7 @@ jobs:
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          version: 1.9.4
+          version: latest
 
       - name: Setup Node.js
         id: setup-node

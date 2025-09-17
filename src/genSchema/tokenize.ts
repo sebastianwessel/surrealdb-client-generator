@@ -5,7 +5,7 @@ const PATTERNS = {
 	CAPTURE_UNTIL_NEXT_CLAUSE: (keyword: string) =>
 		new RegExp(`${keyword}\\s+(.*?)(?=${`\\s+(?:${FIELD_CLAUSES.join('|')})\\s+|$`})`, 'im'),
 	FOR_CLAUSE: /FOR\s+(select|create|update|delete)\s+([^FOR]*?)(?=\s+FOR\s+|$)/gim,
-	DEFINE_FIELD: /DEFINE FIELD(?: IF NOT EXISTS)?\s+((?:`[^`]+`|[^`])+?)\s+ON(?: TABLE)?\s+([\w.:`\-\[\]*]+)/im,
+	DEFINE_FIELD: /DEFINE FIELD(?: IF NOT EXISTS)?\s+((?:`[^`]+`|[^`])+?)\s+ON(?: TABLE)?\s+([\w.:`\-[\]*]+)/im,
 } as const
 
 type PermissionOperation = 'select' | 'create' | 'update' | 'delete'

@@ -37,7 +37,7 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 			let current = fieldMap
 
 			// Todo - handle default values
-			const fieldDefault = undefined //field.default
+			const _fieldDefault = undefined //field.default
 
 			let i = 0
 			for (const part of parts) {

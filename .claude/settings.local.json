@@ -14,7 +14,8 @@
 			"Bash(npx @biomejs/biome check:*)",
 			"Bash(npx @biomejs/biome format:*)",
 			"Bash(npx @biomejs/biome ci:*)",
-			"Bash(npx:*)"
+			"Bash(npx:*)",
+			"Bash(npm install:*)"
 		],
 		"deny": [],
 		"ask": []
