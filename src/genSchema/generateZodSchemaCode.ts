@@ -27,7 +27,12 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 					return part.replace(/`/g, '')
 				}
 				return part
-			})
+			}).filter(part => part.length > 0)
+
+			// Skip if we have no parts left after filtering (e.g., field was just "[*]")
+			if (parts.length === 0) {
+				continue
+			}
 			let current = fieldMap
 
 			// Todo - handle default values
@@ -47,10 +52,16 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 							continue
 						}
 						const sanitizedDefault = defaultValue.replace(/^["']|["']$/g, '')
-						if (sanitizedDefault === '[]' || sanitizedDefault === '{}' || sanitizedDefault === 'null' ||
-							sanitizedDefault === 'true' || sanitizedDefault === 'false' ||
+						if (
+							sanitizedDefault === '[]' ||
+							sanitizedDefault === '{}' ||
+							sanitizedDefault === 'null' ||
+							sanitizedDefault === 'true' ||
+							sanitizedDefault === 'false' ||
 							/^-?\d+(\.\d+)?$/.test(sanitizedDefault) ||
-							sanitizedDefault.startsWith('[') || sanitizedDefault.startsWith('{')) {
+							sanitizedDefault.startsWith('[') ||
+							sanitizedDefault.startsWith('{')
+						) {
 							zodString += `.default(${sanitizedDefault})`
 						} else {
 							zodString += `.default("${sanitizedDefault.replace(/"/g, '\\"')}")`
