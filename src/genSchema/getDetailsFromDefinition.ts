@@ -165,9 +165,9 @@ export const getZodTypeFromQLType = (
 	if (typeStringToProcess.includes('|')) {
 		const unionParts = typeStringToProcess.split('|').map(part => part.trim())
 
-		const allLiterals = unionParts.every(part =>
-			(part.startsWith('"') && part.endsWith('"')) ||
-			(part.startsWith("'") && part.endsWith("'"))
+		// Check for quoted string literals (enum values)
+		const allLiterals = unionParts.every(
+			part => (part.startsWith('"') && part.endsWith('"')) || (part.startsWith("'") && part.endsWith("'")),
 		)
 
 		if (allLiterals) {
@@ -178,17 +178,37 @@ export const getZodTypeFromQLType = (
 			let schema = `z.enum([${enumValues.map(v => `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`).join(', ')}])`
 			schema = makeOptional(schema, tokens, isInputSchema)
 			return schema
-		} else {
-			const unionSchemas = unionParts.map(part => {
-				const partTokens: TokenizedDefinition = { ...tokens, type: part }
-				return getZodTypeFromQLType(partTokens, isInputSchema)
-			})
-			let schema = `z.union([${unionSchemas.join(', ')}])`
-			if (isExplicitlyOptional) {
-				schema += '.optional()'
-			}
-			return schema
 		}
+
+		// Check if all parts are known types (e.g., uuid | int)
+		const typeKeywordRegex = /^(?:option<)?([\w]+)(?:<[^>]+>)?$/i
+		const allKnownTypes = unionParts.every(part => {
+			const match = part.match(typeKeywordRegex)
+			return match ? KNOWN_TYPES.includes(match[1].toLowerCase() as (typeof KNOWN_TYPES)[number]) : false
+		})
+
+		// If not all known types, check for unquoted enum values (e.g., published | draft | archived)
+		if (!allKnownTypes) {
+			const allUnquotedIdentifiers = unionParts.every(part => /^[A-Za-z0-9_-]+$/.test(part))
+			if (allUnquotedIdentifiers) {
+				let schema = `z.enum([${unionParts.map(v => `'${v}'`).join(', ')}])`
+				if (isExplicitlyOptional) {
+					schema += '.optional()'
+				}
+				return schema
+			}
+		}
+
+		// Handle as union of types
+		const unionSchemas = unionParts.map(part => {
+			const partTokens: TokenizedDefinition = { ...tokens, type: part }
+			return getZodTypeFromQLType(partTokens, isInputSchema)
+		})
+		let schema = `z.union([${unionSchemas.join(', ')}])`
+		if (isExplicitlyOptional) {
+			schema += '.optional()'
+		}
+		return schema
 	}
 
 	if (typeStringToProcess.startsWith('range<') && typeStringToProcess.endsWith('>')) {
@@ -244,6 +264,14 @@ export const getZodTypeFromQLType = (
 				.map(p => p.trim())
 				.filter(p => p)
 			if (parts.length > 1) {
+				// Check for unquoted enum values first (e.g., published | draft | archived)
+				if (parts.every(p => /^[A-Za-z0-9_-]+$/.test(p))) {
+					let schema = `z.enum([${parts.map(v => `'${v}'`).join(', ')}])`
+					schema = makeOptional(schema, tokens, isInputSchema)
+					return schema
+				}
+
+				// Check for union of known types (e.g., string | number)
 				const typeKeywordRegex = /^(?:option<)?([\w]+)(?:<[^>]+>)?$/i
 				const allTypes = parts.every(part => {
 					const match = part.match(typeKeywordRegex)
@@ -255,12 +283,6 @@ export const getZodTypeFromQLType = (
 						return getZodTypeFromQLType(subTokens, isInputSchema)
 					})
 					let schema = `z.union([${schemas.join(', ')}])`
-					schema = makeOptional(schema, tokens, isInputSchema)
-					return schema
-				}
-
-				if (parts.every(p => /^[A-Za-z0-9_-]+$/.test(p))) {
-					let schema = `z.enum([${parts.map(v => `'${v}'`).join(', ')}])`
 					schema = makeOptional(schema, tokens, isInputSchema)
 					return schema
 				}

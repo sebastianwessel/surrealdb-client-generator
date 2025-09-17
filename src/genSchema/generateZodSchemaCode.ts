@@ -20,10 +20,8 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 			const parts = field.name.split('.').map(originalPart => {
 				const part = originalPart.replace('[*]', '')
 
+				// Strip backticks if present
 				if (part.startsWith('`') && part.endsWith('`')) {
-					if (part.includes('-')) {
-						return part.replace(/`/g, '"')
-					}
 					return part.replace(/`/g, '')
 				}
 				return part
