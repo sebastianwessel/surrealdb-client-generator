@@ -1,5 +1,18 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+	"files": {
+		"include": ["**/*.ts", "**/*.js", "**/*.json", "**/*.mjs"],
+		"ignore": [
+			"**/dist/**",
+			"**/node_modules/**",
+			"**/.tshy/**",
+			"**/.tshy-build/**",
+			"out/**",
+			"client_generated/**",
+			"**/package-lock.json",
+			"src/vitest.d.ts"
+		]
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
@@ -16,22 +29,9 @@
 				"noInferrableTypes": "error",
 				"noUselessElse": "error"
 			}
-		},
-		"include": ["**/*.ts", "**/*.js", "**/*.json", "**/*.mjs"],
-		"ignore": [
-			"**/dist/**",
-			"**/node_modules/**",
-			"**/.tshy/**",
-			"**/.tshy-build/**",
-			"out/**",
-			"client_generated/**",
-			"**/package-lock.json",
-			"src/vitest.d.ts"
-		]
+		}
 	},
 	"formatter": {
-		"include": ["**/*.ts", "**/*.js", "**/*.json", "**/*.mjs"],
-		"ignore": ["**/dist/**", "**/node_modules/**", "**/.tshy/**", "out/**"],
 		"enabled": true,
 		"formatWithErrors": false,
 		"indentStyle": "tab",
