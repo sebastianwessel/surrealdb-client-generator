@@ -249,12 +249,30 @@ describe('generateZodSchemaCode', () => {
                         author: z.object({
                             name: z.string(),
                             email: z.string(),
-                            tags: z.string().array(),
+                            tags: z.array(z.string()),
                             user: recordId('user')
                         })
                     })
                 })
             `)
+		})
+
+		it('should skip standalone [*] fields that result in empty names', () => {
+			const definition = `
+                DEFINE FIELD permissions ON TABLE role TYPE array<object>;
+                DEFINE FIELD permissions[*] ON TABLE role TYPE object;
+                DEFINE FIELD permissions[*].id ON TABLE role TYPE string;
+                DEFINE FIELD [*] ON TABLE role TYPE array DEFAULT [];
+            `
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			const generatedSchema = generateZodSchemaCode(fields, 'schema')
+
+			expect(generatedSchema).toContain('permissions: z.object({')
+			expect(generatedSchema).toContain('id: z.string()')
+			expect(generatedSchema).not.toContain(': z.array(z.unknown())')
 		})
 	})
 })

@@ -1,0 +1,23 @@
+{
+	"permissions": {
+		"allow": [
+			"Bash(pnpm lint:*)",
+			"Bash(git fetch:*)",
+			"Bash(git rebase:*)",
+			"Bash(gh pr list:*)",
+			"WebFetch(domain:github.com)",
+			"WebFetch(domain:patch-diff.githubusercontent.com)",
+			"Bash(git pull:*)",
+			"Bash(git merge:*)",
+			"Bash(git reset:*)",
+			"Bash(gh pr create:*)",
+			"Bash(npx @biomejs/biome check:*)",
+			"Bash(npx @biomejs/biome format:*)",
+			"Bash(npx @biomejs/biome ci:*)",
+			"Bash(npx:*)",
+			"Bash(npm install:*)"
+		],
+		"deny": [],
+		"ask": []
+	}
+}

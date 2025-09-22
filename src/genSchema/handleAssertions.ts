@@ -38,13 +38,13 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 			case 'hexadecimal':
 				return `${schema}.regex(/^[0-9a-fA-F]*$/)`
 			case 'latitude':
-				return `${schema}.regex(/^(\+|-)?(?:90(?:(?:\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,6})?))$/)`
+				return `${schema}.regex(/^(+|-)?(?:90(?:(?:.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:.[0-9]{1,6})?))$/)`
 			case 'longitude':
-				return `${schema}.regex(/^(\+|-)?(?:180(?:(?:\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,6})?))$/)`
+				return `${schema}.regex(/^(+|-)?(?:180(?:(?:.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:.[0-9]{1,6})?))$/)`
 			case 'numeric':
 				return `${schema}.regex(/^[0-9]*$/)`
 			case 'semver':
-				return `${schema}.regex(/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(0|[1-9A-Za-z-][0-9A-Za-z-]*)(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/)`
+				return `${schema}.regex(/^(0|[1-9][0-9]*).(0|[1-9][0-9]*).(0|[1-9][0-9]*)(-(0|[1-9A-Za-z-][0-9A-Za-z-]*)(.[0-9A-Za-z-]+)*)?(+[0-9A-Za-z-]+(.[0-9A-Za-z-]+)*)?$/)`
 			case 'uuid':
 				return `${schema}.uuid()`
 			case 'ip':

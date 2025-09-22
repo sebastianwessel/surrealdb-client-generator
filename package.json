@@ -47,7 +47,7 @@
 		"postpublish": "npx jsr publish"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.0.0",
+		"@biomejs/biome": "^2.2.4",
 		"@types/node": "^24.0.3",
 		"esbuild": "^0.25.5",
 		"jsr": "^0.13.1",

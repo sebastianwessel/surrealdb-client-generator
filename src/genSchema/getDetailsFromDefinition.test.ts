@@ -216,46 +216,34 @@ describe('getDetailsFromDefinition', () => {
 			expect(result.zodString).toBe("z.enum(['value with \\'quotes\\'', 'another value'])")
 		})
 
-                it('handles mixed quotes if the tokenizer allows (though SurrealDB likely expects consistency per literal)', () => {
-                        const result = getDetailsFromDefinition(
-                                'DEFINE FIELD mixed ON test TYPE "double_quoted" | \'single_quoted\';',
-                                false,
-                        )
-                        expect(result.zodString).toBe("z.enum(['double_quoted', 'single_quoted'])")
-                })
+		it('handles mixed quotes if the tokenizer allows (though SurrealDB likely expects consistency per literal)', () => {
+			const result = getDetailsFromDefinition(
+				'DEFINE FIELD mixed ON test TYPE "double_quoted" | \'single_quoted\';',
+				false,
+			)
+			expect(result.zodString).toBe("z.enum(['double_quoted', 'single_quoted'])")
+		})
 
-                it('handles unquoted enum values', () => {
-                        const result = getDetailsFromDefinition(
-                                'DEFINE FIELD status ON post TYPE published | draft | archived;',
-                                false,
-                        )
-                        expect(result.zodString).toBe("z.enum(['published', 'draft', 'archived'])")
-                })
+		it('handles unquoted enum values', () => {
+			const result = getDetailsFromDefinition('DEFINE FIELD status ON post TYPE published | draft | archived;', false)
+			expect(result.zodString).toBe("z.enum(['published', 'draft', 'archived'])")
+		})
 
-                it('handles option<unquoted enum values>', () => {
-                        const result = getDetailsFromDefinition(
-                                'DEFINE FIELD status ON post TYPE option<published | draft>;',
-                                false,
-                        )
-                        expect(result.zodString).toBe("z.enum(['published', 'draft']).optional()")
-                })
+		it('handles option<unquoted enum values>', () => {
+			const result = getDetailsFromDefinition('DEFINE FIELD status ON post TYPE option<published | draft>;', false)
+			expect(result.zodString).toBe("z.enum(['published', 'draft']).optional()")
+		})
 
-                it('handles union of types', () => {
-                        const result = getDetailsFromDefinition(
-                                'DEFINE FIELD uid ON account TYPE uuid | int;',
-                                false,
-                        )
-                        expect(result.zodString).toBe('z.union([z.string().uuid(), z.number()])')
-                })
+		it('handles union of types', () => {
+			const result = getDetailsFromDefinition('DEFINE FIELD uid ON account TYPE uuid | int;', false)
+			expect(result.zodString).toBe('z.union([z.string().uuid(), z.number()])')
+		})
 
-                it('handles option<union of types>', () => {
-                        const result = getDetailsFromDefinition(
-                                'DEFINE FIELD uid ON account TYPE option<uuid | int>;',
-                                false,
-                        )
-                        expect(result.zodString).toBe('z.union([z.string().uuid(), z.number()]).optional()')
-                })
-        })
+		it('handles option<union of types>', () => {
+			const result = getDetailsFromDefinition('DEFINE FIELD uid ON account TYPE option<uuid | int>;', false)
+			expect(result.zodString).toBe('z.union([z.string().uuid(), z.number()]).optional()')
+		})
+	})
 
 	describe('output schema', () => {
 		const isInputSchema = false

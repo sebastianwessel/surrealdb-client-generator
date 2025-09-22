@@ -13,34 +13,63 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 	// biome-ignore lint/suspicious/noExplicitAny: ok here
 	const buildSchema = (fieldMap: { [key: string]: any }, fields: FieldDetail[]) => {
 		for (const field of fields) {
-			const parts = field.name.split('.').map(originalPart => {
-				const part = originalPart.replace('[*]', '')
+			if (field.name.match(/^[^.]+\[\*\]$/)) {
+				continue
+			}
 
-				if (part.startsWith('`') && part.endsWith('`')) {
-					if (part.includes('-')) {
-						return part.replace(/`/g, '"')
+			const parts = field.name
+				.split('.')
+				.map(originalPart => {
+					const part = originalPart.replace('[*]', '')
+
+					// Strip backticks if present
+					if (part.startsWith('`') && part.endsWith('`')) {
+						return part.replace(/`/g, '')
 					}
-					return part.replace(/`/g, '')
-				}
-				return part
-			})
+					return part
+				})
+				.filter(part => part.length > 0)
 
+			// Skip if we have no parts left after filtering (e.g., field was just "[*]")
+			if (parts.length === 0) {
+				continue
+			}
 			let current = fieldMap
 
 			// Todo - handle default values
-			const fieldDefault = undefined //field.default
+			const _fieldDefault = undefined //field.default
 
 			let i = 0
 			for (const part of parts) {
 				if (i === parts.length - 1) {
-					// Leaf node
+					if (current[part] && typeof current[part] === 'string') {
+						i++
+						continue
+					}
 					let zodString = field.zodString
-					if (fieldDefault !== undefined) {
-						zodString += `.default(${fieldDefault})`
+					if (field.default !== undefined && field.default !== null && !field.zodString.includes('.optional()')) {
+						const defaultValue = field.default
+						if (defaultValue === 'ALWAYS' || defaultValue.startsWith('ALWAYS ')) {
+							continue
+						}
+						const sanitizedDefault = defaultValue.replace(/^["']|["']$/g, '')
+						if (
+							sanitizedDefault === '[]' ||
+							sanitizedDefault === '{}' ||
+							sanitizedDefault === 'null' ||
+							sanitizedDefault === 'true' ||
+							sanitizedDefault === 'false' ||
+							/^-?\d+(\.\d+)?$/.test(sanitizedDefault) ||
+							sanitizedDefault.startsWith('[') ||
+							sanitizedDefault.startsWith('{')
+						) {
+							zodString += `.default(${sanitizedDefault})`
+						} else {
+							zodString += `.default("${sanitizedDefault.replace(/"/g, '\\"')}")`
+						}
 					}
 					current[part] = zodString
 				} else {
-					// Intermediate node
 					if (!current[part] || typeof current[part] === 'string') {
 						current[part] = {}
 					}
@@ -61,8 +90,16 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 					return f.name.replace(regex, '').includes(`${fullKey}[*]`)
 				})
 
+				const needsQuotes = /[^a-zA-Z0-9_$]/.test(key) || /^\d/.test(key)
+				const quotedKey = needsQuotes ? `"${key}"` : key
+
 				if (typeof value === 'string') {
-					return `${key}: ${value}${isArray ? '.array()' : ''}`
+					if (isArray && !value.includes('.array()') && !value.startsWith('z.array(')) {
+						const hasOptional = value.includes('.optional()')
+						const baseValue = hasOptional ? value.replace('.optional()', '') : value
+						return `${quotedKey}: ${baseValue}.array()${hasOptional ? '.optional()' : ''}`
+					}
+					return `${quotedKey}: ${value}`
 				}
 				const innerObject = buildObject(value, fullKey)
 				let objectSchema = `z.object({\n${innerObject}\n  })`
@@ -82,7 +119,7 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 					objectSchema += '.optional()'
 				}
 
-				return `${key}: ${objectSchema}`
+				return `${quotedKey}: ${objectSchema}`
 			})
 			return entries.join(',\n  ')
 		}
