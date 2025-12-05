@@ -160,13 +160,8 @@ export type ${toUpperCamelCase(tableName)} = z.output<typeof ${tableName}Schema>
 		await fs.writeFile(mainIndexFileName, mainIndexContent)
 		console.log(' ✅ Created/Updated main schema index.ts')
 
-		const genIndexFileName = resolve(genSchemaFolder, 'index.ts')
-		if (!(await fs.stat(genIndexFileName).catch(() => false))) {
-			await createIndexFile(genSchemaFolder, generatedFiles)
-			console.log(' ✅ Created _generated/index.ts')
-		} else {
-			console.log(' ❎ _generated/index.ts already exists')
-		}
+		await createIndexFile(genSchemaFolder, generatedFiles)
+		console.log(' ✅ Created/Updated _generated/index.ts')
 	} catch (error) {
 		console.error('An error occurred during schema generation:', error)
 		throw error
