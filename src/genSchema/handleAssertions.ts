@@ -10,16 +10,39 @@ const parseComparison = (condition: string): [ComparisonOperator, string] | null
 		if (condition.includes(op)) {
 			const [_, value] = condition.split(op)
 			if (value) {
-				return [op, value.trim()]
+				const cleanedValue = value.trim().match(/^-?\d+(\.\d+)?/)?.[0]
+				if (cleanedValue) {
+					return [op, cleanedValue]
+				}
 			}
 		}
 	}
 	return null
 }
 
+const cleanEnumArray = (arrayStr: string): string => {
+	const cleanedArray = arrayStr
+		.replace(/^\[/, '')
+		.replace(/\]$/, '')
+		.split(',')
+		.map(v => v.trim())
+		.filter(v => {
+			if (v.length === 0) return false
+			if (v.startsWith("'") || v.startsWith('"')) {
+				return true
+			}
+			const upperV = v.toUpperCase()
+			return upperV !== 'NONE' && upperV !== 'NULL'
+		})
+		.join(', ')
+	return `[${cleanedArray}]`
+}
+
 const handleStringAssertions = (schema: string, condition: string): string => {
+	const processedCondition = condition.replace(/\$value\s*=\s*NONE\s+OR\s+/i, '')
+
 	const stringAssertionRegex = /\s?string::is::([^)]*)\(/im
-	const match = condition.match(stringAssertionRegex)
+	const match = processedCondition.match(stringAssertionRegex)
 
 	if (match) {
 		switch (match[1]?.toLowerCase()) {
@@ -59,7 +82,7 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 	}
 
 	const lenComparisonRegex = /string::len\(\$value\)\s*([<>]=?|=)\s*(\d+)/
-	const lenMatch = condition.match(lenComparisonRegex)
+	const lenMatch = processedCondition.match(lenComparisonRegex)
 	if (lenMatch) {
 		const [_, op, value] = lenMatch
 		if (value) {
@@ -81,28 +104,28 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 		}
 	}
 
-	if (condition.includes('NOT IN') || condition.includes('NOTINSIDE')) {
-		const match = condition.match(/(NOT IN|NOTINSIDE)\s*(\[.*?])/)
-		if (match?.[2]) {
-			const values = match[2].trim()
+	if (processedCondition.includes('NOT IN') || processedCondition.includes('NOTINSIDE')) {
+		const notInMatch = processedCondition.match(/(NOT IN|NOTINSIDE)\s*(\[.*?])/)
+		if (notInMatch?.[2]) {
+			const values = cleanEnumArray(notInMatch[2].trim())
 			return `${schema}.refine((val) => !${values}.includes(val), {
             message: "String must not be one of ${values}",
         })`
 		}
-	} else if (condition.includes('INSIDE')) {
-		const match = condition.match(/INSIDE\s*(\[.*?])/)
-		if (match?.[1]) {
-			return `z.enum(${match[1].trim()})`
+	} else if (processedCondition.includes('INSIDE')) {
+		const insideMatch = processedCondition.match(/INSIDE\s*(\[.*?])/)
+		if (insideMatch?.[1]) {
+			return `z.enum(${cleanEnumArray(insideMatch[1].trim())})`
 		}
-	} else if (condition.includes('IN')) {
-		const match = condition.match(/\bIN\s*(\[.*?])/)
-		if (match?.[1]) {
-			return `z.enum(${match[1].trim()})`
+	} else if (processedCondition.includes('IN')) {
+		const inMatch = processedCondition.match(/\bIN\s*(\[.*?])/)
+		if (inMatch?.[1]) {
+			return `z.enum(${cleanEnumArray(inMatch[1].trim())})`
 		}
 	}
 
 	const multiWordRegex = /^array::len\(string::words\(\$value\)\)\s*>\s*1$/
-	if (multiWordRegex.test(condition)) {
+	if (multiWordRegex.test(processedCondition)) {
 		return `${schema}.refine((val) => val.trim().split(/\\s+/).length > 1, {
         message: "String must contain more than 1 word",
     })`
@@ -110,7 +133,7 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 
 	const emptyOrMultiWordRegex =
 		/^IF\s+\$value\s+THEN\s+array::len\(string::words\(\$value\)\)\s*>\s*1\s+ELSE\s+true\s+END$/
-	if (emptyOrMultiWordRegex.test(condition)) {
+	if (emptyOrMultiWordRegex.test(processedCondition)) {
 		return `${schema}.refine((val) => !val || val.trim().split(/\\s+/).length > 1, {
         message: "String must be empty or contain more than 1 word",
     })`
@@ -120,7 +143,13 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 }
 
 const handleNumberAssertions = (schema: string, condition: string): string => {
-	const comparisonResult = parseComparison(condition)
+	const processedCondition = condition
+		.replace(/\$value\s*=\s*NONE\s+OR\s+/i, '')
+		.replace(/^\(/, '')
+		.replace(/\)$/, '')
+		.trim()
+
+	const comparisonResult = parseComparison(processedCondition)
 	if (comparisonResult) {
 		const [op, value] = comparisonResult
 		switch (op) {
