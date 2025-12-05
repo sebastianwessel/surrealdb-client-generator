@@ -13,7 +13,7 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 	// biome-ignore lint/suspicious/noExplicitAny: ok here
 	const buildSchema = (fieldMap: { [key: string]: any }, fields: FieldDetail[]) => {
 		for (const field of fields) {
-			if (field.name.match(/^[^.]+\[\*\]$/)) {
+			if (field.name.match(/^`?[^.`]+`?\[\*\]$/) || field.name.match(/^`?[^.`]+`?\.\*$/)) {
 				continue
 			}
 
@@ -28,9 +28,8 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 					}
 					return part
 				})
-				.filter(part => part.length > 0)
+				.filter(part => part.length > 0 && part !== '*')
 
-			// Skip if we have no parts left after filtering (e.g., field was just "[*]")
 			if (parts.length === 0) {
 				continue
 			}
@@ -87,7 +86,8 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 				const fullKey = parentKey ? `${parentKey}.${key}` : key
 				const regex = createRegex(key)
 				const isArray = fields.some(f => {
-					return f.name.replace(regex, '').includes(`${fullKey}[*]`)
+					const normalized = f.name.replace(regex, '')
+					return normalized.includes(`${fullKey}[*]`) || normalized.includes(`${fullKey}.*`)
 				})
 
 				const needsQuotes = /[^a-zA-Z0-9_$]/.test(key) || /^\d/.test(key)
