@@ -219,12 +219,19 @@ describe('handleAssertions', () => {
 				)
 			})
 
-			it('handles multiple NONE/NULL checks in number assertions', () => {
-				// Edge case: multiple null checks like $value = NONE OR $value = NULL OR (...)
-				// Current implementation only strips one, but should still work
+			it('handles single NONE check with parenthesized range assertion', () => {
+				// Strips $value = NONE OR prefix and extracts the range from parentheses
 				expect(handleAssertions('z.number()', '$value = NONE OR ($value >= 0 AND $value <= 100)', 'number')).toBe(
 					'z.number().min(0).max(100)',
 				)
+			})
+
+			it('handles multiple NONE/NULL checks in number assertions', () => {
+				// Edge case: multiple consecutive null checks before the actual constraint
+				// Current implementation strips $value = NONE OR once, leaving $value = NULL OR
+				expect(
+					handleAssertions('z.number()', '$value = NONE OR $value = NULL OR ($value >= 0 AND $value <= 100)', 'number'),
+				).toBe('z.number().min(0).max(100)')
 			})
 		})
 	})
