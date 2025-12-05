@@ -365,5 +365,55 @@ describe('generateZodSchemaCode', () => {
 			expect(generatedSchema).toContain('values:')
 			expect(generatedSchema).toContain('name:')
 		})
+
+		it('should generate .array().optional() for optional arrays with dot-star nested objects', () => {
+			const definition = `
+				DEFINE FIELD images ON TABLE recipe TYPE option<array<record<asset>>>;
+				DEFINE FIELD images.* ON TABLE recipe TYPE record<asset>;
+			`
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, true))
+			const generatedSchema = generateZodSchemaCode(fields, 'recipeInputSchema')
+
+			expect(generatedSchema).toContain('.array().optional()')
+			expect(generatedSchema).not.toContain('.optional().array()')
+		})
+
+		it('should generate .array().optional() for optional arrays with bracket nested objects', () => {
+			const definition = `
+				DEFINE FIELD tags ON TABLE post TYPE option<array<record<tag>>>;
+				DEFINE FIELD tags[*] ON TABLE post TYPE record<tag>;
+			`
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, true))
+			const generatedSchema = generateZodSchemaCode(fields, 'postInputSchema')
+
+			expect(generatedSchema).toContain('.array().optional()')
+			expect(generatedSchema).not.toContain('.optional().array()')
+		})
+
+		it('should handle optional object arrays with nested properties using dot-star', () => {
+			const definition = `
+				DEFINE FIELD grants ON TABLE role TYPE option<array<object>>;
+				DEFINE FIELD grants.* ON TABLE role TYPE object;
+				DEFINE FIELD grants.*.id ON TABLE role TYPE record<permission>;
+				DEFINE FIELD grants.*.is_deny ON TABLE role TYPE bool DEFAULT false;
+			`
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, true))
+			const generatedSchema = generateZodSchemaCode(fields, 'roleInputSchema')
+
+			expect(generatedSchema).toContain('grants:')
+			expect(generatedSchema).toContain('.array().optional()')
+			expect(generatedSchema).toContain('id:')
+			expect(generatedSchema).toContain('is_deny:')
+			expect(generatedSchema).not.toMatch(/^\s*:\s*z\./)
+		})
 	})
 })
