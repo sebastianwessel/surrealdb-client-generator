@@ -4,16 +4,16 @@ const escapeRegExp = (string: string) => {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-const createRegex = (key: string) => {
+const createArraySuffixRegex = (key: string) => {
 	const escapedKey = escapeRegExp(key)
-	return new RegExp(`(?<!${escapedKey})\\[\\*\\]`, 'g')
+	return new RegExp(`(?<!${escapedKey})(\\[\\*\\]|\\.\\*)`, 'g')
 }
 
 export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string): string => {
 	// biome-ignore lint/suspicious/noExplicitAny: ok here
 	const buildSchema = (fieldMap: { [key: string]: any }, fields: FieldDetail[]) => {
 		for (const field of fields) {
-			if (field.name.match(/^`?[^.`]+`?\[\*\]$/) || field.name.match(/^`?[^.`]+`?\.\*$/)) {
+			if (field.name.match(/^(`[^`]+`|[^.`]+)\[\*\]$/) || field.name.match(/^(`[^`]+`|[^.`]+)\.\*$/)) {
 				continue
 			}
 
@@ -84,7 +84,7 @@ export const generateZodSchemaCode = (fields: FieldDetail[], schemaName: string)
 		const buildObject = (obj: { [key: string]: any }, parentKey = ''): string => {
 			const entries = Object.entries(obj).map(([key, value]) => {
 				const fullKey = parentKey ? `${parentKey}.${key}` : key
-				const regex = createRegex(key)
+				const regex = createArraySuffixRegex(key)
 				const isArray = fields.some(f => {
 					const normalized = f.name.replace(regex, '')
 					return normalized.includes(`${fullKey}[*]`) || normalized.includes(`${fullKey}.*`)

@@ -219,9 +219,7 @@ describe('handleAssertions', () => {
 				)
 			})
 
-			it('handles multiple NONE/NULL checks in number assertions', () => {
-				// Edge case: multiple null checks like $value = NONE OR $value = NULL OR (...)
-				// Current implementation only strips one, but should still work
+			it('handles NONE check prefix in number assertions', () => {
 				expect(handleAssertions('z.number()', '$value = NONE OR ($value >= 0 AND $value <= 100)', 'number')).toBe(
 					'z.number().min(0).max(100)',
 				)
