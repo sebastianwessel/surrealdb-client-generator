@@ -274,5 +274,146 @@ describe('generateZodSchemaCode', () => {
 			expect(generatedSchema).toContain('id: z.string()')
 			expect(generatedSchema).not.toContain(': z.array(z.unknown())')
 		})
+
+		// Bug 1: Empty field name from nested array field definitions using dot-star syntax
+		it('should skip dot-star array element definitions (permissions.*)', () => {
+			const definition = `
+                DEFINE FIELD permissions ON TABLE role TYPE array DEFAULT [];
+                DEFINE FIELD permissions.* ON TABLE role TYPE object;
+                DEFINE FIELD permissions.*.id ON TABLE role TYPE record<permission>;
+                DEFINE FIELD permissions.*.is_deny ON TABLE role TYPE bool DEFAULT false;
+            `
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, true))
+			const generatedSchema = generateZodSchemaCode(fields, 'roleInputSchema')
+
+			// Should NOT have empty field name
+			expect(generatedSchema).not.toMatch(/^\s*:\s*z\./)
+			expect(generatedSchema).not.toContain(': z.array(z.unknown())')
+			// Should have permissions as an array
+			expect(generatedSchema).toContain('permissions:')
+		})
+
+		it('should handle mixed bracket and dot-star array syntax', () => {
+			const definition = `
+                DEFINE FIELD items ON TABLE test TYPE array DEFAULT [];
+                DEFINE FIELD items.* ON TABLE test TYPE object;
+                DEFINE FIELD items.*.name ON TABLE test TYPE string;
+                DEFINE FIELD tags ON TABLE test TYPE array<string>;
+                DEFINE FIELD tags[*] ON TABLE test TYPE string;
+            `
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			const generatedSchema = generateZodSchemaCode(fields, 'testSchema')
+
+			// Should have both items and tags without empty field names
+			expect(generatedSchema).toContain('items:')
+			expect(generatedSchema).toContain('tags:')
+			expect(generatedSchema).not.toMatch(/^\s*:\s*z\./)
+		})
+
+		it('should handle backtick-wrapped field names with dot-star syntax', () => {
+			const fields: FieldDetail[] = [
+				{ name: '`field-items`', table: 'test', zodString: 'z.array(z.unknown())', skip: false },
+				{ name: '`field-items`.*', table: 'test', zodString: 'z.object({})', skip: false },
+				{ name: '`field-items`.*.name', table: 'test', zodString: 'z.string()', skip: false },
+			]
+			const generatedSchema = generateZodSchemaCode(fields, 'testSchema')
+
+			// Should NOT have empty field name from `field-items`.*
+			expect(generatedSchema).not.toMatch(/^\s*:\s*z\./)
+			expect(generatedSchema).toContain('"field-items":')
+		})
+
+		it('should handle backtick-wrapped field names with bracket syntax', () => {
+			const fields: FieldDetail[] = [
+				{ name: '`special-tags`', table: 'test', zodString: 'z.array(z.string())', skip: false },
+				{ name: '`special-tags`[*]', table: 'test', zodString: 'z.string()', skip: false },
+			]
+			const generatedSchema = generateZodSchemaCode(fields, 'testSchema')
+
+			// Should NOT have empty field name from `special-tags`[*]
+			expect(generatedSchema).not.toMatch(/^\s*:\s*z\./)
+			expect(generatedSchema).toContain('"special-tags":')
+		})
+
+		it('should handle deeply nested dot-star array syntax', () => {
+			const definition = `
+				DEFINE FIELD data ON TABLE test TYPE object;
+				DEFINE FIELD data.items ON TABLE test TYPE array;
+				DEFINE FIELD data.items.* ON TABLE test TYPE object;
+				DEFINE FIELD data.items.*.values ON TABLE test TYPE array;
+				DEFINE FIELD data.items.*.values.* ON TABLE test TYPE object;
+				DEFINE FIELD data.items.*.values.*.name ON TABLE test TYPE string;
+			`
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, false))
+			const generatedSchema = generateZodSchemaCode(fields, 'testSchema')
+
+			// Should NOT have empty field names
+			expect(generatedSchema).not.toMatch(/^\s*:\s*z\./)
+			expect(generatedSchema).not.toContain(': z.array(z.unknown())')
+			// Should have proper nested structure
+			expect(generatedSchema).toContain('data:')
+			expect(generatedSchema).toContain('items:')
+			expect(generatedSchema).toContain('values:')
+			expect(generatedSchema).toContain('name:')
+		})
+
+		it('should generate .array().optional() for optional arrays with dot-star nested objects', () => {
+			const definition = `
+				DEFINE FIELD images ON TABLE recipe TYPE option<array<record<asset>>>;
+				DEFINE FIELD images.* ON TABLE recipe TYPE record<asset>;
+			`
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, true))
+			const generatedSchema = generateZodSchemaCode(fields, 'recipeInputSchema')
+
+			expect(generatedSchema).toContain('.array().optional()')
+			expect(generatedSchema).not.toContain('.optional().array()')
+		})
+
+		it('should generate .array().optional() for optional arrays with bracket nested objects', () => {
+			const definition = `
+				DEFINE FIELD tags ON TABLE post TYPE option<array<record<tag>>>;
+				DEFINE FIELD tags[*] ON TABLE post TYPE record<tag>;
+			`
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, true))
+			const generatedSchema = generateZodSchemaCode(fields, 'postInputSchema')
+
+			expect(generatedSchema).toContain('.array().optional()')
+			expect(generatedSchema).not.toContain('.optional().array()')
+		})
+
+		it('should handle optional object arrays with nested properties using dot-star', () => {
+			const definition = `
+				DEFINE FIELD grants ON TABLE role TYPE option<array<object>>;
+				DEFINE FIELD grants.* ON TABLE role TYPE object;
+				DEFINE FIELD grants.*.id ON TABLE role TYPE record<permission>;
+				DEFINE FIELD grants.*.is_deny ON TABLE role TYPE bool DEFAULT false;
+			`
+			const fields = definition
+				.split(';')
+				.filter(x => x.trim().length)
+				.map(def => getDetailsFromDefinition(def, true))
+			const generatedSchema = generateZodSchemaCode(fields, 'roleInputSchema')
+
+			expect(generatedSchema).toContain('grants:')
+			expect(generatedSchema).toContain('.array().optional()')
+			expect(generatedSchema).toContain('id:')
+			expect(generatedSchema).toContain('is_deny:')
+			expect(generatedSchema).not.toMatch(/^\s*:\s*z\./)
+		})
 	})
 })

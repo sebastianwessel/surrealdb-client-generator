@@ -151,5 +151,79 @@ describe('handleAssertions', () => {
 				expect(handleAssertions('z.string()', 'unknown', 'string')).toBe('z.string()')
 			})
 		})
+
+		describe('Bug fixes', () => {
+			// Bug 2: Extra closing parenthesis on chained validators
+			it('handles number assertions with trailing parentheses from split conditions', () => {
+				// When assertion is "$value = NONE OR ($value >= 0 AND $value <= 100)"
+				// After splitting by AND, we get "$value <= 100)" with trailing paren
+				expect(handleAssertions('z.number()', '$value <= 100)', 'number')).toBe('z.number().max(100)')
+				expect(handleAssertions('z.number()', '$value >= 0)', 'number')).toBe('z.number().min(0)')
+			})
+
+			it('handles combined min/max assertions with parentheses', () => {
+				expect(handleAssertions('z.number()', '$value >= 0 AND $value <= 100', 'number')).toBe(
+					'z.number().min(0).max(100)',
+				)
+			})
+
+			it('handles assertion with $value = NONE OR prefix for numbers', () => {
+				// Bug 2: Should strip the NONE OR prefix and handle the range correctly
+				expect(handleAssertions('z.number()', '$value = NONE OR ($value >= 0 AND $value <= 100)', 'number')).toBe(
+					'z.number().min(0).max(100)',
+				)
+			})
+
+			// Bug 3: NONE literal appearing unquoted in enum arrays
+			it('strips $value = NONE OR prefix from string enum assertions', () => {
+				expect(handleAssertions('z.string()', "$value = NONE OR $value IN ['ebook', 'video', 'audio']", 'string')).toBe(
+					"z.enum(['ebook', 'video', 'audio'])",
+				)
+			})
+
+			it('filters out NONE from enum values if accidentally included', () => {
+				// If NONE somehow ends up in the array, it should be filtered out
+				expect(handleAssertions('z.string()', "IN [NONE, 'active', 'inactive']", 'string')).toBe(
+					"z.enum(['active', 'inactive'])",
+				)
+			})
+
+			it('filters out NULL from enum values', () => {
+				expect(handleAssertions('z.string()', "IN [NULL, 'active', 'inactive']", 'string')).toBe(
+					"z.enum(['active', 'inactive'])",
+				)
+			})
+
+			it('handles INSIDE with $value = NONE OR prefix', () => {
+				expect(handleAssertions('z.string()', "$value = NONE OR $value INSIDE ['pending', 'done']", 'string')).toBe(
+					"z.enum(['pending', 'done'])",
+				)
+			})
+
+			// Critical edge case: Quoted 'NONE' is a valid enum value and should be preserved
+			it('preserves quoted NONE as a valid string enum value', () => {
+				expect(handleAssertions('z.string()', "IN ['LOW', 'NONE', 'HIGH']", 'string')).toBe(
+					"z.enum(['LOW', 'NONE', 'HIGH'])",
+				)
+			})
+
+			it('preserves quoted NULL as a valid string enum value', () => {
+				expect(handleAssertions('z.string()', "IN ['value', 'NULL', 'other']", 'string')).toBe(
+					"z.enum(['value', 'NULL', 'other'])",
+				)
+			})
+
+			it('filters unquoted NONE but keeps quoted NONE', () => {
+				expect(handleAssertions('z.string()', "IN [NONE, 'NONE', 'active']", 'string')).toBe(
+					"z.enum(['NONE', 'active'])",
+				)
+			})
+
+			it('handles NONE check prefix in number assertions', () => {
+				expect(handleAssertions('z.number()', '$value = NONE OR ($value >= 0 AND $value <= 100)', 'number')).toBe(
+					'z.number().min(0).max(100)',
+				)
+			})
+		})
 	})
 })
