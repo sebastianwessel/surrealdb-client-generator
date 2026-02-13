@@ -98,11 +98,19 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 			case 'uuid':
 				return `${schema}.uuid()`
 			case 'ip':
-				return `${schema}.ip()`
+				return `${schema}.refine((val) => {
+        const ipv4 = /^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$/
+        const ipv6 = /^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4})$/
+        return ipv4.test(val) || ipv6.test(val)
+    }, { message: "Invalid IP address" })`
 			case 'ipv4':
-				return `${schema}.ip({ version: "v4" })`
+				return `${schema}.refine((val) => /^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$/.test(val), {
+        message: "Invalid IPv4 address",
+    })`
 			case 'ipv6':
-				return `${schema}.ip({ version: "v6" })`
+				return `${schema}.refine((val) => /^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4})$/.test(val), {
+        message: "Invalid IPv6 address",
+    })`
 			default:
 				return schema
 		}

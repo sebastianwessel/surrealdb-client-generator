@@ -6,9 +6,9 @@ describe('handleAssertions', () => {
 			expect(handleAssertions('z.string()', 'string::is::email()', 'string')).toBe('z.string().email()')
 			expect(handleAssertions('z.string()', 'string::is::url()', 'string')).toBe('z.string().url()')
 			expect(handleAssertions('z.string()', 'string::is::uuid()', 'string')).toBe('z.string().uuid()')
-			expect(handleAssertions('z.string()', 'string::is::ip()', 'string')).toBe('z.string().ip()')
-			expect(handleAssertions('z.string()', 'string::is::ipv4()', 'string')).toBe('z.string().ip({ version: "v4" })')
-			expect(handleAssertions('z.string()', 'string::is::ipv6()', 'string')).toBe('z.string().ip({ version: "v6" })')
+			expect(handleAssertions('z.string()', 'string::is::ip()', 'string')).toContain('Invalid IP address')
+			expect(handleAssertions('z.string()', 'string::is::ipv4()', 'string')).toContain('Invalid IPv4 address')
+			expect(handleAssertions('z.string()', 'string::is::ipv6()', 'string')).toContain('Invalid IPv6 address')
 			expect(handleAssertions('z.string()', 'string::is::datetime()', 'string')).toBe('z.string().datetime()')
 		})
 
