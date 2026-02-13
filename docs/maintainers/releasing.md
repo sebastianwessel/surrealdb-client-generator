@@ -19,6 +19,10 @@ References:
 - [npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers)
 - [JSR publishing from GitHub Actions](https://jsr.io/docs/publishing-packages#publishing-from-github-actions)
 
+Important:
+- For npm Trusted Publishing, do not rely on `NPM_TOKEN` / `NODE_AUTH_TOKEN` in the release workflow.
+- The workflow publishes with `--provenance` using GitHub OIDC (`id-token: write`).
+
 ## What the workflow guarantees
 
 1. Runs lint, tests, build.
