@@ -30,6 +30,9 @@ This means, the option "memory" for connections is no longer available, and you 
 
 - Internal dependency was upgraded to `zod@4`.
 - Generated schema snippets are intentionally kept within APIs that are compatible with both Zod 3 and Zod 4 (for consumers who still validate with Zod 3 in their own projects).
+- For IP assertions, Zod v4 removed `z.string().ip()` (see [Zod v4 changelog](https://zod.dev/v4/changelog)).
+- The generator therefore emits `refine`-based IP validation for cross-version compatibility (Zod 3 and Zod 4).
+- If the project moves to Zod 4-only output in the future, this can be switched to native `ipv4/ipv6` schemas.
 
 ## How It Works
 
