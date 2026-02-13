@@ -166,6 +166,16 @@ To connect to an existing SurrealDB instance, simply omit the `-f` option, or om
 
 In this case, you need to provide the connection information for your running instance.
 
+## Releasing
+
+This repository provides a manual GitHub Actions workflow at `.github/workflows/release-manual.yml` to publish new versions.
+
+- Trigger: `workflow_dispatch` on the `main` branch
+- Inputs: release type (`patch`, `minor`, `major`, `prerelease`) and optional prerelease id
+- npm publish: uses [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) with `id-token: write`
+
+To use Trusted Publishing, configure this GitHub repository as a trusted publisher in npm for `@sebastianwessel/surql-gen`.
+
 ## Code Generation Structure
 
 The generated code is organized into two distinct parts for your convenience:
