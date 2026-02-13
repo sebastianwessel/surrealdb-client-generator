@@ -184,10 +184,11 @@ In this case, you need to provide the connection information for your running in
 This repository provides a manual GitHub Actions workflow at `.github/workflows/release-manual.yml` to publish new versions.
 
 - Trigger: `workflow_dispatch` on the `main` branch
-- Inputs: release type (`patch`, `minor`, `major`, `prerelease`), optional prerelease id, and a required docs confirmation (`confirm_docs_updated=true`)
+- Inputs: `publish_jsr` and required docs confirmation (`confirm_docs_updated=true`)
+- Version source: version is taken from committed code (`package.json` and `jsr.json`) and must already be in sync
 - npm publish: uses [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) with `id-token: write`
 - optional JSR publish: uses GitHub Actions OIDC flow ([JSR docs](https://jsr.io/docs/publishing-packages#publishing-from-github-actions))
-- Git tag: created by `npm version` and pushed automatically
+- Git tag: created and pushed as `v<package.json.version>` after successful publish
 - GitHub Release: created automatically from the new tag with generated release notes
 
 To use Trusted Publishing, configure this GitHub repository as a trusted publisher in npm for `@sebastianwessel/surql-gen`.

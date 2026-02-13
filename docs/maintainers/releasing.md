@@ -5,6 +5,7 @@ Use the manual GitHub Actions workflow:
 - `.github/workflows/release-manual.yml`
 - trigger: `workflow_dispatch`
 - branch: `main`
+- version source: committed `package.json` and `jsr.json` (must match)
 
 ## Required setup
 
@@ -22,8 +23,8 @@ References:
 
 1. Runs lint, tests, build.
 2. Requires explicit docs confirmation (`confirm_docs_updated=true`).
-3. Bumps package version and creates git tag via `npm version`.
-4. Pushes version commit + tag.
-5. Publishes to npm via Trusted Publishing.
-6. Optionally publishes to JSR via GitHub Actions OIDC.
-7. Creates a GitHub Release for the tag.
+3. Fails if `package.json` and `jsr.json` versions are not in sync.
+4. Publishes to npm via Trusted Publishing.
+5. Optionally publishes to JSR via GitHub Actions OIDC.
+6. Creates and pushes git tag `v<version>`.
+7. Creates a GitHub Release for that tag.
