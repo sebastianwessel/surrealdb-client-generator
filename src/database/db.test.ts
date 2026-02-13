@@ -6,12 +6,14 @@ const signinMock = vi.fn()
 const closeMock = vi.fn()
 
 vi.mock('surrealdb', () => ({
-	Surreal: vi.fn().mockImplementation(() => ({
-		connect: connectMock,
-		use: useMock,
-		signin: signinMock,
-		close: closeMock,
-	})),
+	Surreal: vi.fn().mockImplementation(function SurrealMock() {
+		return {
+			connect: connectMock,
+			use: useMock,
+			signin: signinMock,
+			close: closeMock,
+		}
+	}),
 }))
 
 describe('connectDb', () => {
