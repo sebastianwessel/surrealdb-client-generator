@@ -12,6 +12,11 @@
 - Choose to generate only zod schemas or include a basic TypeScript client.
 - Utilize zod schemas for [CIRQL](https://cirql.starlane.studio/) if needed.
 
+## Documentation
+
+- User and maintainer docs: [`docs/`](./docs/README.md)
+- Contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+
 ## 🚨 Warning Version 2.x
 
 Version 2 has breaking changes!  
@@ -20,6 +25,11 @@ The tool now uses `surrealdb` instead of `surrealdb.node` for interacting with a
 The change was made, because it seems that `surrealdb` is closer to the SurrealDB development process and more up to date in general.
 
 This means, the option "memory" for connections is no longer available, and you need to run against a real running SurrealDB instance (use docker).
+
+## Compatibility Notes
+
+- Internal dependency was upgraded to `zod@4`.
+- Generated schema snippets are intentionally kept within APIs that are compatible with both Zod 3 and Zod 4 (for consumers who still validate with Zod 3 in their own projects).
 
 ## How It Works
 
