@@ -324,7 +324,7 @@ describe('Field schema generation', () => {
 		})
 	})
 
-		describe('datetime', () => {
+	describe('datetime', () => {
 		it('basic', () => {
 			const query = 'DEFINE FIELD datetimeField ON TABLE example TYPE datetime'
 			const result = tokenize(query)
@@ -351,7 +351,7 @@ describe('Field schema generation', () => {
 			expect(getZodTypeFromQLType(result, false)).toBe('z.string().datetime().optional()')
 		})
 
-			it('is optional for input if default is set', () => {
+		it('is optional for input if default is set', () => {
 			const query = 'DEFINE FIELD datetimeField ON TABLE example TYPE option<datetime> DEFAULT true'
 			const result = tokenize(query)
 
@@ -362,10 +362,10 @@ describe('Field schema generation', () => {
 				default: 'true',
 			})
 
-				expect(getZodTypeFromQLType(result, true)).toBe(
-					'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
-				)
-			})
+			expect(getZodTypeFromQLType(result, true)).toBe(
+				'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
+			)
+		})
 
 		it('is required for output if default is set', () => {
 			const query = 'DEFINE FIELD datetimeField ON TABLE example TYPE option<datetime> DEFAULT true'

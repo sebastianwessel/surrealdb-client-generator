@@ -1,4 +1,4 @@
-import { readFile, readdir, stat } from 'node:fs/promises'
+import { readdir, readFile, stat } from 'node:fs/promises'
 import { extname, relative, resolve } from 'node:path'
 
 const SUPPORTED_SCHEMA_EXTENSIONS = new Set(['.surql', '.surrealql'])

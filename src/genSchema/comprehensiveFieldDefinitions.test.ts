@@ -141,15 +141,15 @@ describe('Comprehensive Field Definition Tests', () => {
 			expect(result.zodString).toBe('z.any().optional()')
 		})
 
-			it('should make READONLY VALUE fields optional in input schemas', () => {
+		it('should make READONLY VALUE fields optional in input schemas', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD created_at ON TABLE user TYPE datetime READONLY VALUE time::now();',
 				true,
 			)
-				expect(result.zodString).toBe(
-					'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
-				)
-			})
+			expect(result.zodString).toBe(
+				'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
+			)
+		})
 
 		it('should handle VALUE with default fallback in input schemas', () => {
 			const result = getDetailsFromDefinition(
@@ -197,15 +197,15 @@ describe('Comprehensive Field Definition Tests', () => {
 			expect(result.zodString).toBe("recordId('asset').array().optional()")
 		})
 
-			it('should handle meta.created_at with VALUE clause', () => {
+		it('should handle meta.created_at with VALUE clause', () => {
 			const result = getDetailsFromDefinition(
 				'DEFINE FIELD meta.created_at ON recipe TYPE datetime READONLY VALUE time::now() PERMISSIONS FULL',
 				true,
 			)
-				expect(result.zodString).toBe(
-					'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
-				)
-			})
+			expect(result.zodString).toBe(
+				'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
+			)
+		})
 
 		it('should handle fields with both DEFAULT and VALUE clauses', () => {
 			const result = getDetailsFromDefinition(

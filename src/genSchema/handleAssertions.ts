@@ -170,10 +170,7 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 }
 
 const handleNumberAssertions = (schema: string, condition: string): string => {
-	const processedCondition = stripNullablePrefix(condition)
-		.replace(/^\(/, '')
-		.replace(/\)$/, '')
-		.trim()
+	const processedCondition = stripNullablePrefix(condition).replace(/^\(/, '').replace(/\)$/, '').trim()
 
 	const enumValues = getNumericEnumValues(processedCondition)
 	if (enumValues) {

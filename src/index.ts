@@ -66,26 +66,26 @@ const main = async () => {
 	const config = configFileSchema.parse({ ...options, ...fileContent })
 
 	try {
-			if (config.schemaFile) {
-				await connectDb(config, true)
-				try {
-					const schemaContent = await readSchemaDefinitions(config.schemaFile)
-					await insertDefinitions(schemaContent)
-				} catch (error) {
-					const err = error as Error & { code?: string }
-					if (err.code === 'ENOENT') {
-						console.error('')
-						console.error('Unable to find schema file or directory', resolve(__dirname, config.schemaFile))
-						console.error('Please check!')
-						console.error('')
-						process.exit(1)
-					} else {
-						throw new Error(`Error reading schema file or directory: ${err.message}`)
-					}
+		if (config.schemaFile) {
+			await connectDb(config, true)
+			try {
+				const schemaContent = await readSchemaDefinitions(config.schemaFile)
+				await insertDefinitions(schemaContent)
+			} catch (error) {
+				const err = error as Error & { code?: string }
+				if (err.code === 'ENOENT') {
+					console.error('')
+					console.error('Unable to find schema file or directory', resolve(__dirname, config.schemaFile))
+					console.error('Please check!')
+					console.error('')
+					process.exit(1)
+				} else {
+					throw new Error(`Error reading schema file or directory: ${err.message}`)
 				}
-			} else {
-				await connectDb(config)
 			}
+		} else {
+			await connectDb(config)
+		}
 
 		const tableInfo = await getAllTableInfo()
 

@@ -55,9 +55,7 @@ describe('connectDb', () => {
 	})
 
 	it('falls back to username/password signin payload if scoped signin fails', async () => {
-		signinMock
-			.mockRejectedValueOnce(new Error('scoped signin failed'))
-			.mockResolvedValueOnce(undefined)
+		signinMock.mockRejectedValueOnce(new Error('scoped signin failed')).mockResolvedValueOnce(undefined)
 
 		const { connectDb, closeDb } = await import('./db.js')
 		await connectDb(config)
