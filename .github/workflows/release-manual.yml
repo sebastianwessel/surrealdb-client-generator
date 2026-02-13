@@ -1,0 +1,112 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: Version bump type
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      prerelease_id:
+        description: Optional prerelease identifier (only for prerelease, e.g. rc)
+        required: false
+        type: string
+      publish_jsr:
+        description: Also run JSR publish after npm publish
+        required: true
+        default: false
+        type: boolean
+      confirm_docs_updated:
+        description: Confirm README/docs are up to date for this release
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: manual-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Release Package
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure docs confirmation
+        if: inputs.confirm_docs_updated != true
+        run: |
+          echo "Release aborted: confirm_docs_updated must be true."
+          exit 1
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        run: |
+          if [ "${{ inputs.release_type }}" = "prerelease" ] && [ -n "${{ inputs.prerelease_id }}" ]; then
+            npm version prerelease --preid "${{ inputs.prerelease_id }}" -m "chore(release): %s"
+          else
+            npm version "${{ inputs.release_type }}" -m "chore(release): %s"
+          fi
+
+      - name: Push commit and tag
+        run: |
+          git push origin HEAD:main
+          git push origin --tags
+
+      - name: Read package version
+        id: pkg
+        run: echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to npm (Trusted Publishing)
+        run: npm publish --access public --ignore-scripts
+
+      - name: Publish to JSR
+        if: inputs.publish_jsr == true
+        env:
+          JSR_TOKEN: ${{ secrets.JSR_TOKEN }}
+        run: npm run postpublish
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.pkg.outputs.version }}" \
+            --target main \
+            --title "v${{ steps.pkg.outputs.version }}" \
+            --generate-notes

@@ -10,6 +10,7 @@ import { getAllTableInfo } from './database/getAllTableInfo.js'
 import { generateClientJs } from './genClient/generateClientJs.js'
 import { generateTableSchema } from './genSchema/generateTableSchema.js'
 import { printSorry } from './helper/printSorry.js'
+import { readSchemaDefinitions } from './schema/readSchemaDefinitions.js'
 
 const main = async () => {
 	program
@@ -18,7 +19,7 @@ const main = async () => {
 		.version('1.0.0')
 
 	program
-		.option('-f, --schemaFile [schemaFile]', 'a SurrealQL file containing the definitions')
+		.option('-f, --schemaFile [schemaFile]', 'a SurrealQL file or directory containing definitions')
 		.option('-c, --config [config]', 'config file', 'surql-gen.json')
 		.option('-s, --surreal [surreal]', 'SurrealDB connection url', 'http://localhost:8000')
 		.option('-u, --username [username]', 'auth username', 'root')
@@ -67,28 +68,20 @@ const main = async () => {
 	try {
 		if (config.schemaFile) {
 			await connectDb(config, true)
-			const schemaFilePath = resolve(__dirname, config.schemaFile)
-			let schemaContent: string
 			try {
-				schemaContent = await readFile(schemaFilePath, 'utf-8')
+				const schemaContent = await readSchemaDefinitions(config.schemaFile)
+				await insertDefinitions(schemaContent)
 			} catch (error) {
 				const err = error as Error & { code?: string }
 				if (err.code === 'ENOENT') {
 					console.error('')
-					console.error('Unable to find schema file', schemaFilePath)
+					console.error('Unable to find schema file or directory', resolve(__dirname, config.schemaFile))
 					console.error('Please check!')
 					console.error('')
 					process.exit(1)
 				} else {
-					throw new Error(`Error reading schema file: ${err.message}`)
+					throw new Error(`Error reading schema file or directory: ${err.message}`)
 				}
-			}
-
-			try {
-				await insertDefinitions(schemaContent)
-			} catch (error) {
-				printSorry(error)
-				process.exit(1)
 			}
 		} else {
 			await connectDb(config)

@@ -362,7 +362,9 @@ describe('Field schema generation', () => {
 				default: 'true',
 			})
 
-			expect(getZodTypeFromQLType(result, true)).toBe('z.string().datetime().optional()')
+			expect(getZodTypeFromQLType(result, true)).toBe(
+				'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
+			)
 		})
 
 		it('is required for output if default is set', () => {

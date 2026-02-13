@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { mkdirp } from 'mkdirp'
 
 export const ensureRecordSchema = async (rootPath: string) => {
-	const content = `import z from 'zod'
+	const content = `import { z } from 'zod'
 import { RecordId, StringRecordId } from 'surrealdb'
 
 const RecordIdValue = z.union([z.string(), z.number(), z.bigint(), z.record(z.unknown()), z.array(z.unknown())])

@@ -12,6 +12,11 @@
 - Choose to generate only zod schemas or include a basic TypeScript client.
 - Utilize zod schemas for [CIRQL](https://cirql.starlane.studio/) if needed.
 
+## Documentation
+
+- User and maintainer docs: [`docs/`](./docs/README.md)
+- Contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+
 ## 🚨 Warning Version 2.x
 
 Version 2 has breaking changes!  
@@ -20,6 +25,14 @@ The tool now uses `surrealdb` instead of `surrealdb.node` for interacting with a
 The change was made, because it seems that `surrealdb` is closer to the SurrealDB development process and more up to date in general.
 
 This means, the option "memory" for connections is no longer available, and you need to run against a real running SurrealDB instance (use docker).
+
+## Compatibility Notes
+
+- Internal dependency was upgraded to `zod@4`.
+- Generated schema snippets are intentionally kept within APIs that are compatible with both Zod 3 and Zod 4 (for consumers who still validate with Zod 3 in their own projects).
+- For IP assertions, Zod v4 removed `z.string().ip()` (see [Zod v4 changelog](https://zod.dev/v4/changelog)).
+- The generator therefore emits `refine`-based IP validation for cross-version compatibility (Zod 3 and Zod 4).
+- If the project moves to Zod 4-only output in the future, this can be switched to native `ipv4/ipv6` schemas.
 
 ## How It Works
 
@@ -108,7 +121,7 @@ Example:
 }
 ```
 
-## Using a Schema File
+## Using a Schema File or Directory
 > **_NOTE:_**  Docker is required to run SurrealDB in memory.
 
 To use a schema file either provide the -f flag:
@@ -123,6 +136,27 @@ or you can specify the path in the config file:
 }
 ```
 
+You can also provide a directory path. The generator will recursively load all `.surql` and `.surrealql` files from that directory.
+
+Example:
+
+```bash
+surql-gen -f ./db/schema
+```
+
+When using a directory, you can exclude files or folders with a `.ignore` file placed in that directory.
+Each line is a glob-like pattern relative to the schema directory.
+
+Example `.ignore`:
+
+```txt
+# Ignore migration snapshots
+migrations/**
+
+# Ignore a specific file
+legacy.surql
+```
+
 using a schema file utilises a temporary in-memory SurrealDB instance to generate the zod schemas; this instance runs in a docker container.
 If you want to use a different image, you can specify it in the config file:
 ```json
@@ -131,11 +165,33 @@ If you want to use a different image, you can specify it in the config file:
 }
 ```
 
+If your environment can only pull container images from a private registry, configure Testcontainers in `~/.testcontainers.properties`:
+
+```properties
+ryuk.container.image=yourregistry.com/testcontainers/ryuk:0.3.3
+```
+
+Reference: [Testcontainers configuration](https://java.testcontainers.org/features/configuration/#customizing-images)
+
 ## Connecting to an Existing SurrealDB Instance
 
 To connect to an existing SurrealDB instance, simply omit the `-f` option, or omit the `schemaFile` in the config file.
 
 In this case, you need to provide the connection information for your running instance.
+
+## Releasing
+
+This repository provides a manual GitHub Actions workflow at `.github/workflows/release-manual.yml` to publish new versions.
+
+- Trigger: `workflow_dispatch` on the `main` branch
+- Inputs: release type (`patch`, `minor`, `major`, `prerelease`), optional prerelease id, and a required docs confirmation (`confirm_docs_updated=true`)
+- npm publish: uses [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) with `id-token: write`
+- Git tag: created by `npm version` and pushed automatically
+- GitHub Release: created automatically from the new tag with generated release notes
+
+To use Trusted Publishing, configure this GitHub repository as a trusted publisher in npm for `@sebastianwessel/surql-gen`.
+
+Note: this repository currently has no separate website docs pipeline configured in `.github/workflows`. The `README.md` is the primary published documentation source for releases.
 
 ## Code Generation Structure
 
@@ -168,8 +224,8 @@ This design allows you to tailor the generated code to your project's specific r
 | TYPE option\<number\>  | z.number().optional()  | z.number().optional() |
 | TYPE string  | z.string()  | z.string() |
 | TYPE option\<string\>  | z.string().optional()  | z.string().optional() |
-| TYPE datetime  | z.string().datetime()  | z.string().datetime() |
-| TYPE option\<datetime\>  | z.string().datetime().optional()  | z.string().datetime().optional() |
+| TYPE datetime  | z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value))  | z.string().datetime() |
+| TYPE option\<datetime\>  | z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()  | z.string().datetime().optional() |
 | TYPE bool  | z.boolean()  | z.boolean() |
 | TYPE option\<bool\>  | z.boolean().optional()  | z.boolean().optional() |
 | TYPE object  | z.object({})  | z.object({}) |

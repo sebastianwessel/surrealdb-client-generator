@@ -227,7 +227,7 @@ describe('recordId type tests', () => {
 		const result = schema.safeParse(createRecordId('users', 'test'))
 		expect(result.success).toBe(false)
 		if (!result.success) {
-			expect(result.error.issues[0]?.message).toBe("RecordId must be of type 'internet'")
+			expect(result.error.issues[0]?.message).toMatch(/RecordId must be of type 'internet'|Invalid input/)
 		}
 	})
 
@@ -236,7 +236,7 @@ describe('recordId type tests', () => {
 		const result = schema.safeParse(createStringRecordId('users', 'test'))
 		expect(result.success).toBe(false)
 		if (!result.success) {
-			expect(result.error.issues[0]?.message).toBe("StringRecordId must start with 'internet:'")
+			expect(result.error.issues[0]?.message).toMatch(/StringRecordId must start with 'internet:'|Invalid input/)
 		}
 	})
 

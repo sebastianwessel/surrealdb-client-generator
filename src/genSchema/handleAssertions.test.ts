@@ -6,9 +6,9 @@ describe('handleAssertions', () => {
 			expect(handleAssertions('z.string()', 'string::is::email()', 'string')).toBe('z.string().email()')
 			expect(handleAssertions('z.string()', 'string::is::url()', 'string')).toBe('z.string().url()')
 			expect(handleAssertions('z.string()', 'string::is::uuid()', 'string')).toBe('z.string().uuid()')
-			expect(handleAssertions('z.string()', 'string::is::ip()', 'string')).toBe('z.string().ip()')
-			expect(handleAssertions('z.string()', 'string::is::ipv4()', 'string')).toBe('z.string().ip({ version: "v4" })')
-			expect(handleAssertions('z.string()', 'string::is::ipv6()', 'string')).toBe('z.string().ip({ version: "v6" })')
+			expect(handleAssertions('z.string()', 'string::is::ip()', 'string')).toContain('Invalid IP address')
+			expect(handleAssertions('z.string()', 'string::is::ipv4()', 'string')).toContain('Invalid IPv4 address')
+			expect(handleAssertions('z.string()', 'string::is::ipv6()', 'string')).toContain('Invalid IPv6 address')
 			expect(handleAssertions('z.string()', 'string::is::datetime()', 'string')).toBe('z.string().datetime()')
 		})
 
@@ -88,6 +88,19 @@ describe('handleAssertions', () => {
 				expect(handleAssertions('z.number()', '<= 100', 'number')).toBe('z.number().max(100)')
 				expect(handleAssertions('z.number()', '= 50', 'number')).toBe('z.literal(50)')
 				expect(handleAssertions('z.number()', '== 90', 'number')).toBe('z.literal(90)')
+			})
+
+			it('handles IN/INSIDE numeric enum assertions', () => {
+				expect(handleAssertions('z.number()', 'IN [1, 2, 3]', 'number')).toBe(
+					'z.union([z.literal(1), z.literal(2), z.literal(3)])',
+				)
+				expect(handleAssertions('z.number()', 'INSIDE [10]', 'number')).toBe('z.literal(10)')
+			})
+
+			it('filters NONE/NULL and preserves numeric literals in numeric enum assertions', () => {
+				expect(handleAssertions('z.number()', 'IN [NONE, NULL, 1, 2.5, -3]', 'number')).toBe(
+					'z.union([z.literal(1), z.literal(2.5), z.literal(-3)])',
+				)
 			})
 		})
 
@@ -222,6 +235,18 @@ describe('handleAssertions', () => {
 			it('handles NONE check prefix in number assertions', () => {
 				expect(handleAssertions('z.number()', '$value = NONE OR ($value >= 0 AND $value <= 100)', 'number')).toBe(
 					'z.number().min(0).max(100)',
+				)
+			})
+
+			it('handles multiple NONE/NULL prefixes in string enum assertions', () => {
+				expect(
+					handleAssertions('z.string()', "$value = NONE OR $value = NULL OR $value IN ['open', 'closed']", 'string'),
+				).toBe("z.enum(['open', 'closed'])")
+			})
+
+			it('handles multiple NONE/NULL prefixes in numeric enum assertions', () => {
+				expect(handleAssertions('z.number()', '$value = NONE OR $value = NULL OR $value IN [1, 2, 3]', 'number')).toBe(
+					'z.union([z.literal(1), z.literal(2), z.literal(3)])',
 				)
 			})
 		})

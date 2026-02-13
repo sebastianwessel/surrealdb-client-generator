@@ -20,6 +20,9 @@ const parseComparison = (condition: string): [ComparisonOperator, string] | null
 	return null
 }
 
+const stripNullablePrefix = (condition: string): string =>
+	condition.replace(/(?:\$value\s*=\s*(?:NONE|NULL)\s+OR\s*)+/gi, '')
+
 const cleanEnumArray = (arrayStr: string): string => {
 	const cleanedArray = arrayStr
 		.replace(/^\[/, '')
@@ -38,8 +41,32 @@ const cleanEnumArray = (arrayStr: string): string => {
 	return `[${cleanedArray}]`
 }
 
+const getNumericEnumValues = (condition: string): number[] | null => {
+	const enumMatch = condition.match(/\b(?:IN|INSIDE)\s*(\[.*?])/i)
+	if (!enumMatch?.[1]) {
+		return null
+	}
+
+	const values = enumMatch[1]
+		.replace(/^\[/, '')
+		.replace(/\]$/, '')
+		.split(',')
+		.map(v => v.trim())
+		.filter(v => {
+			if (!v.length) return false
+			return !/^NONE$/i.test(v) && !/^NULL$/i.test(v)
+		})
+		.map(v => {
+			const unquoted = v.replace(/^["']|["']$/g, '')
+			return Number(unquoted)
+		})
+		.filter(v => Number.isFinite(v))
+
+	return values.length ? values : null
+}
+
 const handleStringAssertions = (schema: string, condition: string): string => {
-	const processedCondition = condition.replace(/\$value\s*=\s*NONE\s+OR\s+/i, '')
+	const processedCondition = stripNullablePrefix(condition)
 
 	const stringAssertionRegex = /\s?string::is::([^)]*)\(/im
 	const match = processedCondition.match(stringAssertionRegex)
@@ -71,11 +98,19 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 			case 'uuid':
 				return `${schema}.uuid()`
 			case 'ip':
-				return `${schema}.ip()`
+				return `${schema}.refine((val) => {
+        const ipv4 = /^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$/
+        const ipv6 = /^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4})$/
+        return ipv4.test(val) || ipv6.test(val)
+    }, { message: "Invalid IP address" })`
 			case 'ipv4':
-				return `${schema}.ip({ version: "v4" })`
+				return `${schema}.refine((val) => /^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$/.test(val), {
+        message: "Invalid IPv4 address",
+    })`
 			case 'ipv6':
-				return `${schema}.ip({ version: "v6" })`
+				return `${schema}.refine((val) => /^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4})$/.test(val), {
+        message: "Invalid IPv6 address",
+    })`
 			default:
 				return schema
 		}
@@ -143,11 +178,15 @@ const handleStringAssertions = (schema: string, condition: string): string => {
 }
 
 const handleNumberAssertions = (schema: string, condition: string): string => {
-	const processedCondition = condition
-		.replace(/\$value\s*=\s*NONE\s+OR\s+/i, '')
-		.replace(/^\(/, '')
-		.replace(/\)$/, '')
-		.trim()
+	const processedCondition = stripNullablePrefix(condition).replace(/^\(/, '').replace(/\)$/, '').trim()
+
+	const enumValues = getNumericEnumValues(processedCondition)
+	if (enumValues) {
+		if (enumValues.length === 1) {
+			return `z.literal(${enumValues[0]})`
+		}
+		return `z.union([${enumValues.map(value => `z.literal(${value})`).join(', ')}])`
+	}
 
 	const comparisonResult = parseComparison(processedCondition)
 	if (comparisonResult) {

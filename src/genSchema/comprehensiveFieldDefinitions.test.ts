@@ -146,7 +146,9 @@ describe('Comprehensive Field Definition Tests', () => {
 				'DEFINE FIELD created_at ON TABLE user TYPE datetime READONLY VALUE time::now();',
 				true,
 			)
-			expect(result.zodString).toBe('z.string().datetime().optional()')
+			expect(result.zodString).toBe(
+				'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
+			)
 		})
 
 		it('should handle VALUE with default fallback in input schemas', () => {
@@ -200,7 +202,9 @@ describe('Comprehensive Field Definition Tests', () => {
 				'DEFINE FIELD meta.created_at ON recipe TYPE datetime READONLY VALUE time::now() PERMISSIONS FULL',
 				true,
 			)
-			expect(result.zodString).toBe('z.string().datetime().optional()')
+			expect(result.zodString).toBe(
+				'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()',
+			)
 		})
 
 		it('should handle fields with both DEFAULT and VALUE clauses', () => {
