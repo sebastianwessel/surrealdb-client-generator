@@ -171,10 +171,14 @@ In this case, you need to provide the connection information for your running in
 This repository provides a manual GitHub Actions workflow at `.github/workflows/release-manual.yml` to publish new versions.
 
 - Trigger: `workflow_dispatch` on the `main` branch
-- Inputs: release type (`patch`, `minor`, `major`, `prerelease`) and optional prerelease id
+- Inputs: release type (`patch`, `minor`, `major`, `prerelease`), optional prerelease id, and a required docs confirmation (`confirm_docs_updated=true`)
 - npm publish: uses [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) with `id-token: write`
+- Git tag: created by `npm version` and pushed automatically
+- GitHub Release: created automatically from the new tag with generated release notes
 
 To use Trusted Publishing, configure this GitHub repository as a trusted publisher in npm for `@sebastianwessel/surql-gen`.
+
+Note: this repository currently has no separate website docs pipeline configured in `.github/workflows`. The `README.md` is the primary published documentation source for releases.
 
 ## Code Generation Structure
 

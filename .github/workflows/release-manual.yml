@@ -21,6 +21,11 @@ on:
         required: true
         default: false
         type: boolean
+      confirm_docs_updated:
+        description: Confirm README/docs are up to date for this release
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: manual-release
@@ -51,6 +56,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Ensure docs confirmation
+        if: inputs.confirm_docs_updated != true
+        run: |
+          echo "Release aborted: confirm_docs_updated must be true."
+          exit 1
+
       - name: Lint
         run: npm run lint
 
@@ -78,6 +89,10 @@ jobs:
           git push origin HEAD:main
           git push origin --tags
 
+      - name: Read package version
+        id: pkg
+        run: echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+
       - name: Publish to npm (Trusted Publishing)
         run: npm publish --access public --ignore-scripts
 
@@ -86,3 +101,12 @@ jobs:
         env:
           JSR_TOKEN: ${{ secrets.JSR_TOKEN }}
         run: npm run postpublish
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.pkg.outputs.version }}" \
+            --target main \
+            --title "v${{ steps.pkg.outputs.version }}" \
+            --generate-notes
