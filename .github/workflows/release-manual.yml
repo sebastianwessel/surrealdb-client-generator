@@ -76,13 +76,25 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Bump version
+      - name: Bump package version (no tag yet)
+        id: npmver
         run: |
           if [ "${{ inputs.release_type }}" = "prerelease" ] && [ -n "${{ inputs.prerelease_id }}" ]; then
-            npm version prerelease --preid "${{ inputs.prerelease_id }}" -m "chore(release): %s"
+            npm version prerelease --preid "${{ inputs.prerelease_id }}" --no-git-tag-version
           else
-            npm version "${{ inputs.release_type }}" -m "chore(release): %s"
+            npm version "${{ inputs.release_type }}" --no-git-tag-version
           fi
+          echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+
+      - name: Sync jsr.json version
+        run: |
+          node -e "const fs=require('fs');const pkg=require('./package.json');const jsr=require('./jsr.json');jsr.version=pkg.version;fs.writeFileSync('./jsr.json', JSON.stringify(jsr, null, '\\t') + '\n');"
+
+      - name: Commit and tag release
+        run: |
+          git add package.json package-lock.json jsr.json
+          git commit -m "chore(release): v${{ steps.npmver.outputs.version }}"
+          git tag "v${{ steps.npmver.outputs.version }}"
 
       - name: Push commit and tag
         run: |
@@ -98,9 +110,7 @@ jobs:
 
       - name: Publish to JSR
         if: inputs.publish_jsr == true
-        env:
-          JSR_TOKEN: ${{ secrets.JSR_TOKEN }}
-        run: npm run postpublish
+        run: npx jsr publish
 
       - name: Create GitHub Release
         env:

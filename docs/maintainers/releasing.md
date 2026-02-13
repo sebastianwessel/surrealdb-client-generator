@@ -12,9 +12,11 @@ Use the manual GitHub Actions workflow:
    - package: `@sebastianwessel/surql-gen`
    - repo: `sebastianwessel/surrealdb-client-generator`
    - workflow: `.github/workflows/release-manual.yml`
-2. Optional: add `JSR_TOKEN` secret for JSR publish step.
+2. Configure JSR publish from GitHub Actions for this repository (OIDC / GitHub linkage in JSR settings).
 
-Reference: [npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers)
+References:
+- [npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers)
+- [JSR publishing from GitHub Actions](https://jsr.io/docs/publishing-packages#publishing-from-github-actions)
 
 ## What the workflow guarantees
 
@@ -23,5 +25,5 @@ Reference: [npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers)
 3. Bumps package version and creates git tag via `npm version`.
 4. Pushes version commit + tag.
 5. Publishes to npm via Trusted Publishing.
-6. Optionally publishes to JSR.
+6. Optionally publishes to JSR via GitHub Actions OIDC.
 7. Creates a GitHub Release for the tag.

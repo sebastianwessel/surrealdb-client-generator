@@ -186,6 +186,7 @@ This repository provides a manual GitHub Actions workflow at `.github/workflows/
 - Trigger: `workflow_dispatch` on the `main` branch
 - Inputs: release type (`patch`, `minor`, `major`, `prerelease`), optional prerelease id, and a required docs confirmation (`confirm_docs_updated=true`)
 - npm publish: uses [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) with `id-token: write`
+- optional JSR publish: uses GitHub Actions OIDC flow ([JSR docs](https://jsr.io/docs/publishing-packages#publishing-from-github-actions))
 - Git tag: created by `npm version` and pushed automatically
 - GitHub Release: created automatically from the new tag with generated release notes
 
