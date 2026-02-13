@@ -69,13 +69,37 @@ export const connectDb = async (config: Config, createInstance = false) => {
 		}
 	}
 
+	let lastSignInError: unknown
+	const signInPayloads: Record<string, string>[] = [
+		{
+			namespace: config.ns,
+			database: config.db,
+			username: config.username,
+			password: config.password,
+		},
+		{
+			username: config.username,
+			password: config.password,
+		},
+	]
+
+	for (const payload of signInPayloads) {
+		try {
+			await db.signin(payload)
+			lastSignInError = undefined
+			break
+		} catch (error) {
+			lastSignInError = error
+		}
+	}
+
+	if (lastSignInError) {
+		throw lastSignInError
+	}
+
 	await db.use({
 		namespace: config.ns,
 		database: config.db,
-	})
-	await db.signin({
-		username: config.username,
-		password: config.password,
 	})
 	console.log('Connected to database successfully')
 }

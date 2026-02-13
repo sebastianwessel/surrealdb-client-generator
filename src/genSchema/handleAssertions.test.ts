@@ -82,14 +82,27 @@ describe('handleAssertions', () => {
 			expect(handleAssertions('z.string()', 'string::is::unknown()', 'string')).toBe('z.string()')
 		})
 
-		describe('Number assertions', () => {
-			it('handles comparison assertions', () => {
-				expect(handleAssertions('z.number()', '> 0', 'number')).toBe('z.number().min(1)')
-				expect(handleAssertions('z.number()', '<= 100', 'number')).toBe('z.number().max(100)')
-				expect(handleAssertions('z.number()', '= 50', 'number')).toBe('z.literal(50)')
-				expect(handleAssertions('z.number()', '== 90', 'number')).toBe('z.literal(90)')
+			describe('Number assertions', () => {
+				it('handles comparison assertions', () => {
+					expect(handleAssertions('z.number()', '> 0', 'number')).toBe('z.number().min(1)')
+					expect(handleAssertions('z.number()', '<= 100', 'number')).toBe('z.number().max(100)')
+					expect(handleAssertions('z.number()', '= 50', 'number')).toBe('z.literal(50)')
+					expect(handleAssertions('z.number()', '== 90', 'number')).toBe('z.literal(90)')
+				})
+
+				it('handles IN/INSIDE numeric enum assertions', () => {
+					expect(handleAssertions('z.number()', 'IN [1, 2, 3]', 'number')).toBe(
+						'z.union([z.literal(1), z.literal(2), z.literal(3)])',
+					)
+					expect(handleAssertions('z.number()', 'INSIDE [10]', 'number')).toBe('z.literal(10)')
+				})
+
+				it('filters NONE/NULL and preserves numeric literals in numeric enum assertions', () => {
+					expect(handleAssertions('z.number()', 'IN [NONE, NULL, 1, 2.5, -3]', 'number')).toBe(
+						'z.union([z.literal(1), z.literal(2.5), z.literal(-3)])',
+					)
+				})
 			})
-		})
 
 		describe('Date assertions', () => {
 			it('handles empty assertion', () => {
@@ -152,7 +165,7 @@ describe('handleAssertions', () => {
 			})
 		})
 
-		describe('Bug fixes', () => {
+			describe('Bug fixes', () => {
 			// Bug 2: Extra closing parenthesis on chained validators
 			it('handles number assertions with trailing parentheses from split conditions', () => {
 				// When assertion is "$value = NONE OR ($value >= 0 AND $value <= 100)"
@@ -219,11 +232,23 @@ describe('handleAssertions', () => {
 				)
 			})
 
-			it('handles NONE check prefix in number assertions', () => {
-				expect(handleAssertions('z.number()', '$value = NONE OR ($value >= 0 AND $value <= 100)', 'number')).toBe(
-					'z.number().min(0).max(100)',
-				)
+				it('handles NONE check prefix in number assertions', () => {
+					expect(handleAssertions('z.number()', '$value = NONE OR ($value >= 0 AND $value <= 100)', 'number')).toBe(
+						'z.number().min(0).max(100)',
+					)
+				})
+
+				it('handles multiple NONE/NULL prefixes in string enum assertions', () => {
+					expect(
+						handleAssertions('z.string()', "$value = NONE OR $value = NULL OR $value IN ['open', 'closed']", 'string'),
+					).toBe("z.enum(['open', 'closed'])")
+				})
+
+				it('handles multiple NONE/NULL prefixes in numeric enum assertions', () => {
+					expect(handleAssertions('z.number()', '$value = NONE OR $value = NULL OR $value IN [1, 2, 3]', 'number')).toBe(
+						'z.union([z.literal(1), z.literal(2), z.literal(3)])',
+					)
+				})
 			})
 		})
 	})
-})

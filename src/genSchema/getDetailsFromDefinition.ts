@@ -94,6 +94,9 @@ const getSchemaForType = (type: string, tokens: TokenizedDefinition, isInputSche
 		case 'string':
 			return 'z.string()'
 		case 'datetime':
+			if (isInputSchema) {
+				return 'z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value))'
+			}
 			return 'z.string().datetime()'
 		case 'set':
 			return getSetType(tokens, isInputSchema)

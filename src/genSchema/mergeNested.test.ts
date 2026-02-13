@@ -11,11 +11,11 @@ describe('mergeNested', () => {
 		const result = mergeNested(fields, true, 'book')
 
 		expect(result).toEqualIgnoringWhitespace(`
-            const bookInputSchemaGen = z.object({
-                title: z.string(),
-                published: z.string().datetime()
-            })
-        `)
+	            const bookInputSchemaGen = z.object({
+	                title: z.string(),
+	                published: z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value))
+	            })
+	        `)
 	})
 
 	it('correctly processes nested objects and arrays', () => {
@@ -35,12 +35,12 @@ describe('mergeNested', () => {
 		const result = mergeNested(fields, true, 'book')
 
 		expect(result).toEqualIgnoringWhitespace(`
-            const bookInputSchemaGen = z.object({
-                title: z.string(),
-                published: z.string().datetime(),
-                vendors: z.object({
-                    name: z.string(),
-                    price: z.number(),
+	            const bookInputSchemaGen = z.object({
+	                title: z.string(),
+	                published: z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)),
+	                vendors: z.object({
+	                    name: z.string(),
+	                    price: z.number(),
                     ratings: z.object({
                         score: z.number().optional()
                     }).array().optional()

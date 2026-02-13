@@ -108,7 +108,7 @@ Example:
 }
 ```
 
-## Using a Schema File
+## Using a Schema File or Directory
 > **_NOTE:_**  Docker is required to run SurrealDB in memory.
 
 To use a schema file either provide the -f flag:
@@ -123,6 +123,27 @@ or you can specify the path in the config file:
 }
 ```
 
+You can also provide a directory path. The generator will recursively load all `.surql` and `.surrealql` files from that directory.
+
+Example:
+
+```bash
+surql-gen -f ./db/schema
+```
+
+When using a directory, you can exclude files or folders with a `.ignore` file placed in that directory.
+Each line is a glob-like pattern relative to the schema directory.
+
+Example `.ignore`:
+
+```txt
+# Ignore migration snapshots
+migrations/**
+
+# Ignore a specific file
+legacy.surql
+```
+
 using a schema file utilises a temporary in-memory SurrealDB instance to generate the zod schemas; this instance runs in a docker container.
 If you want to use a different image, you can specify it in the config file:
 ```json
@@ -130,6 +151,14 @@ If you want to use a different image, you can specify it in the config file:
   "surrealImage": "surrealdb/surrealdb:latest"
 }
 ```
+
+If your environment can only pull container images from a private registry, configure Testcontainers in `~/.testcontainers.properties`:
+
+```properties
+ryuk.container.image=yourregistry.com/testcontainers/ryuk:0.3.3
+```
+
+Reference: [Testcontainers configuration](https://java.testcontainers.org/features/configuration/#customizing-images)
 
 ## Connecting to an Existing SurrealDB Instance
 
@@ -168,8 +197,8 @@ This design allows you to tailor the generated code to your project's specific r
 | TYPE option\<number\>  | z.number().optional()  | z.number().optional() |
 | TYPE string  | z.string()  | z.string() |
 | TYPE option\<string\>  | z.string().optional()  | z.string().optional() |
-| TYPE datetime  | z.string().datetime()  | z.string().datetime() |
-| TYPE option\<datetime\>  | z.string().datetime().optional()  | z.string().datetime().optional() |
+| TYPE datetime  | z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value))  | z.string().datetime() |
+| TYPE option\<datetime\>  | z.union([z.string().datetime(), z.date()]).transform((value) => value instanceof Date ? value : new Date(value)).optional()  | z.string().datetime().optional() |
 | TYPE bool  | z.boolean()  | z.boolean() |
 | TYPE option\<bool\>  | z.boolean().optional()  | z.boolean().optional() |
 | TYPE object  | z.object({})  | z.object({}) |
